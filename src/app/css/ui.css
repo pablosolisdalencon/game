@@ -1,0 +1,123 @@
+/* Estilos personalizados adicionales si son necesarios */
+        body {
+            font-family: 'Inter', sans-serif; /* Fuente sugerida */
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Para evitar barras de scroll en el contenedor principal */
+        }
+        .main-container {
+            width: 100vw; /* 100% del ancho de la ventana */
+            height: 100vh; /* 100% del alto de la ventana */
+            display: flex;
+            flex-direction: column; /* Apila los componentes verticalmente */
+        }
+        .space-map {
+            background-position: center;
+            background-image: url('../../../public/ofices/spaceMap-alta.png');
+            background-size: cover; 
+            height: 40%;
+            background-color: #34495e; /* Color de ejemplo para spaceMap */
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 2px solid #2c3e50; /* Borde para separación visual */
+        }
+        .city-map {
+            height: 40%;
+            background-color: #ecf0f1; /* Color de ejemplo para cityMap */
+            display: flex;
+            flex-direction: column; /* Para alinear el contenedor de la cuadrícula */
+            align-items: center;
+            justify-content: center;
+            padding: 1%; /* Pequeño padding para que no se pegue a los bordes */
+            border-bottom: 2px solid #bdc3c7; /* Borde para separación visual */
+        }
+        .city-map-grid {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-wrap: wrap; /* Permite que los elementos pasen a la siguiente línea */
+            justify-content: space-around; /* Distribuye el espacio entre elementos */
+            align-content: space-around; /* Distribuye el espacio entre líneas */
+        }
+        .city-build {
+            /* Cada cityBuild ocupa 18% del contenedor cityMap */
+            /* Con 5 elementos, 5 * 18% = 90%. El 10% restante es para el espacio. */
+            /* Hay 4 espacios entre 5 elementos, 10% / 4 = 2.5% de espacio por hueco */
+            /* Tailwind no maneja esto directamente con 'gap' en porcentajes de esta forma, */
+            /* por lo que 'space-around' en el contenedor padre es una buena aproximación. */
+            /* O se puede usar 'margin' en cada elemento. */
+            width: 20%;
+            height: 20%;
+            background-color: #95a5a6; /* Color de ejemplo para cityBuild */
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px; /* Bordes redondeados */
+            font-size: 0.7rem;
+            text-align: center;
+            margin:2%;
+        }
+        .menu-container {
+            height: 20%;
+            background-color: #3498db; /* Color de ejemplo para menu */
+            display: flex; /* Alinea los slotMenu horizontalmente */
+            justify-content: space-around; /* Distribuye el espacio */
+            align-items: center;
+            padding: 0 1%; /* Padding horizontal */
+        }
+        .slot-menu {
+            width: 19%; /* Aproximadamente 20%, dejando un pequeño espacio si se usa space-around */
+            height: 90%; /* Un poco menos del 100% para padding visual */
+            background-color: #2980b9; /* Color de ejemplo para slotMenu */
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px; /* Bordes redondeados */
+            font-size: 0.8rem;
+            text-align: center;
+            padding: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Sombra suave */
+        }
+        .avatar-circle {
+            width: 60px; /* Tamaño del círculo del avatar */
+            height: 60px;
+            background-color: #ecf0f1; /* Color de fondo del círculo */
+            border-radius: 50%; /* Hace el div un círculo */
+            background-size: cover; /* Asegura que la imagen cubra el círculo */
+            background-position: center; /* Centra la imagen */
+            margin-bottom: 5px; /* Espacio debajo del avatar */
+            border: 2px solid white; /* Borde blanco para el avatar */
+        }
+        .menu-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+        .menu-button svg { /* Estilo para los iconos SVG */
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+        }
+
+        /* builds */
+        .city-build {
+            background-position: center;
+            background-image: url('../../../public/ofices/cama-alta.png');
+            background-size: cover; 
+        }
+        .mineriaBuild {background-image: url('../../../public/ofices/mineria-alta.png');}
+        .construccionBuild {background-image: url('../../../public/ofices/construccion-alta.png');}
+        .fabricaBuild {background-image: url('../../../public/ofices/fabrica-alta.png');}
+        .lanzaderaBuild {background-image: url('../../../public/ofices/lanzadera-alta.png');}
+        .miliciaBuild {background-image: url('../../../public/ofices/milicia-alta.png');}
+        .gobiernoBuild {background-image: url('../../../public/ofices/gobierno-alta.png');}
+        .exploracionBuild {background-image: url('../../../public/ofices/exploracion-alta.png');}
+        .hotelBuild {background-image: url('../../../public/ofices/home-alta.png');}
