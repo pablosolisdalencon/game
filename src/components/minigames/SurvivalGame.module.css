@@ -1,0 +1,56 @@
+.gameContainer {
+  width: 100%;
+  height: 100%;
+  position: relative; /* For positioning overlay elements like joystick and buttons */
+  display: flex; /* To center canvas if it's smaller than container */
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* Prevents joystick/buttons from causing scroll on container */
+}
+
+.gameCanvas {
+  display: block; /* Removes extra space below canvas if it were inline */
+  /* width and height are set by JS to match parent or fixed, then scaled by CSS if needed.
+     For this setup, JS sets canvas pixel dimensions, and CSS width/height 100%
+     is not strictly necessary if the JS always matches parent. But it's good for fallback.
+  */
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain; /* If canvas aspect ratio is fixed and parent is not */
+}
+
+.joystickWrapper {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  z-index: 20; /* Ensure joystick is above canvas, but below potential modal overlays like claim button */
+}
+
+/* Future: .fireButton if SurvivalGame gets one */
+/* Example:
+.fireButton {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 20;
+  width: 70px;
+  height: 70px;
+  background-color: var(--accent-red, #ff4f4f);
+  color: var(--text-primary, white);
+  font-family: var(--font-header, 'Aldrich', sans-serif);
+  font-size: 0.9rem;
+  border: 2px solid var(--color-metal-light, #7f7f81);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 0 10px var(--accent-red, #ff4f4f);
+}
+
+.fireButton:active {
+  background-color: var(--accent-yellow, #ffd700);
+  color: var(--bg-main, black);
+  transform: scale(0.95);
+}
+*/
