@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(10, 10, 20, 0.75); /* Using a dark blueish tint, can use var(--bg-main) with alpha */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -13,114 +13,131 @@
 }
 
 .modal-content {
-  background-color: #fff;
+  background-color: var(--bg-panel);
   padding: 25px;
   border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  border: 2px solid var(--color-metal);
+  box-shadow: 0 0 15px var(--accent-cyan), inset 0 0 8px rgba(0,0,0,0.6);
   width: 100%;
   max-width: 600px;
   text-align: left;
   max-height: 90vh;
   overflow-y: auto;
+  color: var(--text-primary);
 }
 
 .modal-content h2 { /* Office Name title */
+  font-family: var(--font-header);
+  color: var(--accent-cyan);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--color-metal-light);
+  padding-bottom: 10px; /* Original value from plan */
+  margin-bottom: 15px; /* Original value from plan */
   margin-top: 0;
-  margin-bottom: 15px;
-  font-size: 0.9em; /* Halved from 1.8em */
-  color: #333;
+  font-size: 0.9em; /* Remains halved */
   text-align: center;
 }
 
 .modal-content .office-description {
+  font-family: var(--font-primary);
+  color: var(--text-secondary);
   margin-bottom: 20px;
-  font-size: 0.5em; /* Halved from 1em */
-  line-height: 1.5; /* Adjusted line-height for smaller font, could be 1.4-1.6 */
-  color: #555;
+  font-size: 0.5em; /* Remains halved */
+  line-height: 1.5;
 }
 
 /* Mission List Styling */
 .mission-list {
   margin-top: 20px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--color-metal); /* Themed border */
   padding-top: 15px;
 }
 
 .mission-list h3 { /* "Misiones Disponibles:" */
+  font-family: var(--font-header);
+  color: var(--accent-yellow); /* Secondary accent */
   margin-top: 0;
   margin-bottom: 15px;
-  font-size: 0.7em; /* Halved from 1.4em */
-  color: #444;
+  font-size: 0.7em; /* Remains halved */
 }
 
 .mission-item {
-  border: 1px solid #e0e0e0;
+  background-color: var(--bg-panel-medium);
+  border: 1px solid var(--color-metal);
   padding: 15px;
-  margin-bottom: 12px;
+  margin-bottom: 8px; /* Adjusted from 12px */
   border-radius: 6px;
   cursor: pointer;
-  background-color: #f9f9f9;
   transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
 .mission-item:hover {
-  background-color: #f0f0f0;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  background-color: var(--color-metal-light); /* Use theme color */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Darker shadow */
 }
 
 .mission-title { /* Mission Name */
+  font-family: var(--font-primary); /* Ensure primary font or header if preferred */
+  color: var(--text-primary); /* Changed from #0056b3 */
   font-weight: bold;
-  font-size: 0.575em; /* Halved from 1.15em */
-  color: #0056b3;
+  font-size: 0.575em; /* Remains halved */
   margin-bottom: 5px;
 }
 
 .mission-item div { /* For location and reward lines */
-  font-size: 0.475em; /* Halved from 0.95em */
-  color: #666;
+  font-family: var(--font-primary);
+  color: var(--text-secondary); /* Changed from #666 */
+  font-size: 0.475em; /* Remains halved */
   margin-bottom: 3px;
 }
 
 /* Expanded Mission Details */
 .mission-detail {
+  background-color: var(--bg-main); /* Darker inset */
+  border: 1px dashed var(--color-metal-light); /* Dashed border for datapad feel */
   margin-top: 15px;
   padding: 15px;
-  background-color: #e9ecef;
   border-radius: 4px;
-  border: 1px solid #ced4da;
 }
 
 .mission-detail p { /* Mission description text */
-  font-size: 0.45em; /* Halved from 0.9em */
-  line-height: 1.5; /* Adjusted line-height */
-  color: #343a40;
+  font-family: var(--font-mono); /* Mono font for datapad feel */
+  color: var(--text-primary); /* Changed from #343a40 */
+  font-size: 0.45em; /* Remains halved */
+  line-height: 1.5;
   white-space: pre-wrap;
 }
 
 /* Buttons Styling */
-.modal-button { /* General button style in this modal */
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 8px 15px; /* Slightly adjusted padding for smaller text */
+.modal-button {
+  font-family: var(--font-primary);
+  background-color: var(--color-metal);
+  color: var(--text-primary);
+  border: 1px solid var(--color-metal-light);
+  text-transform: uppercase;
+  padding: 8px 15px;
   border-radius: 5px;
   cursor: pointer;
   margin-top: 10px;
-  font-size: 0.475em; /* Halved from 0.95em */
-  transition: background-color 0.2s ease, transform 0.1s ease;
+  font-size: 0.475em; /* Remains halved */
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .modal-button:hover {
-  background-color: #0056b3;
-  transform: translateY(-1px);
+  background-color: var(--accent-cyan);
+  color: var(--bg-main); /* Dark text for contrast on cyan */
+  box-shadow: 0 0 8px var(--accent-cyan);
 }
 
 .modal-button.secondary {
-  background-color: #6c757d;
+  background-color: transparent;
+  border-color: var(--color-metal);
+  color: var(--text-secondary);
 }
 
 .modal-button.secondary:hover {
-  background-color: #5a6268;
+  background-color: var(--color-metal); /* Use a theme color */
+  color: var(--text-primary); /* Use theme text color */
 }
 
 .mission-detail .modal-button {
@@ -134,9 +151,13 @@
   margin-left: auto;
   margin-right: auto;
   margin-top: 25px;
-  background-color: #dc3545;
-  /* font-size will be inherited from .modal-button (0.475em) */
+  background-color: var(--accent-red); /* Use accent for main close */
+  border-color: var(--accent-red); /* Match border */
+  color: var(--bg-main); /* Dark text on red for contrast */
 }
 .modal-content > .modal-button:hover {
-  background-color: #c82333;
+  background-color: #ff2f2f; /* Brighter red on hover */
+  border-color: #ff2f2f;
+  box-shadow: 0 0 8px var(--accent-red);
+  color: var(--bg-main);
 }

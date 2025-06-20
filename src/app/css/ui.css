@@ -1,9 +1,9 @@
 /* Estilos personalizados adicionales si son necesarios */
         body {
-            font-family: 'Inter', sans-serif; /* Fuente sugerida */
+            /* font-family is now set by html tag from globals.css */
             margin: 0;
             padding: 0;
-            overflow: hidden; /* Para evitar barras de scroll en el contenedor principal */
+            overflow: hidden;
         }
         .main-container {
             width: 100vw;
@@ -13,25 +13,25 @@
         }
         .space-map {
             background-position: center;
-            background-image: url('../../../public/ofices/spaceMap-alta.png');
+            background-image: url('../../../public/ofices/spaceMap-alta.png'); /* This will remain */
             background-size: cover; 
-            height: 45%; /* Adjusted from 40% */
-            background-color: #34495e;
-            color: white;
+            height: 45%;
+            background-color: var(--bg-main); /* Changed from #34495e */
+            color: var(--text-primary); /* Changed from white */
             display: flex;
             align-items: center;
             justify-content: center;
-            border-bottom: 2px solid #2c3e50;
+            border-bottom: 2px solid var(--color-metal); /* Changed from #2c3e50 */
         }
         .city-map {
-            height: 45%; /* Adjusted from 40% */
-            background-color: #ecf0f1;
+            height: 45%;
+            background-color: var(--bg-panel-medium); /* Changed from #ecf0f1 */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 1%;
-            border-bottom: 2px solid #bdc3c7;
+            border-bottom: 2px solid var(--color-metal); /* Changed from #bdc3c7 */
         }
         .city-map-grid {
             width: 100%;
@@ -44,73 +44,86 @@
         .city-build {
             width: 20%;
             height: 20%;
-            background-color: #95a5a6;
-            color: white;
+            /* background-color: #95a5a6; Default BG if image fails, can be themed */
+            color: var(--text-primary); /* Changed from white, though image might cover */
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 8px;
+            font-family: var(--font-mono); /* Monospaced font */
             font-size: 0.35rem; /* Font size remains halved */
             text-align: center;
-            margin:2%;
+            margin: 2%; /* Kept existing margin */
+            padding: 2px 4px; /* Added padding */
+            border: 1px solid var(--accent-cyan); /* Neon accent border */
+            box-shadow: 0 0 3px var(--accent-cyan), inset 0 0 2px rgba(0,255,255,0.3); /* Neon glow + subtle inset */
+            overflow: hidden;
+            position: relative;
         }
         .menu-container {
-            height: 10%; /* Re-reduced from 20% */
-            background-color: #3498db;
+            height: 10%;
+            background-color: var(--bg-panel-medium); /* Applied theme color */
             display: flex;
             justify-content: space-around;
             align-items: center;
             padding: 0 1%;
+            border-top: 2px solid var(--color-metal); /* Added border */
+            box-shadow: inset 0 1px 0px var(--color-metal-light); /* Added subtle highlight */
         }
         .slot-menu {
             width: 19%;
-            height: 85%; /* Re-reduced from 90% */
-            background-color: #2980b9;
-            color: white;
+            height: 85%;
+            background-color: var(--bg-panel); /* Applied theme color */
+            color: var(--text-primary); /* Applied theme text color */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border-radius: 8px; /* Re-reduced from 10px */
+            border-radius: 8px;
+            font-family: var(--font-primary); /* Ensure primary font for menu text */
             font-size: 0.8rem; /* Menu text font size remains at its larger (original) value */
             text-align: center;
-            padding: 2.5px; /* Re-reduced from 5px */
-            box-shadow: 0 1px 2px rgba(0,0,0,0.2); /* Re-reduced from 0 2px 4px */
+            padding: 2.5px;
+            border: 1px solid var(--color-metal); /* Added border */
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.5); /* Added inset shadow */
         }
 
         .slot-menu.account-details {
-            background-color: #1c6ca7;
+            /* background-color is var(--bg-panel) from .slot-menu */
             justify-content: flex-start;
-            padding: 5px; /* Re-reduced from 10px */
+            padding: 5px;
         }
         .account-details .menu-header {
-            font-size: 0.9rem; /* Menu text font size remains at its larger (original) value */
-            font-weight: bold;
-            margin-bottom: 3px; /* Re-reduced from 8px (or 4px post-font-halving) */
-            color: #aaddff;
+            font-family: var(--font-header); /* Applied theme header font */
+            color: var(--accent-cyan); /* Applied theme accent color */
+            font-size: 0.9rem;
+            font-weight: bold; /* Weight can be adjusted by font itself */
+            margin-bottom: 3px;
             text-transform: uppercase;
-            border-bottom: 1px solid #3a90c7;
-            padding-bottom: 1px; /* Re-reduced from 4px (or 2px post-font-halving) */
+            border-bottom: 1px solid var(--color-metal-light); /* Use theme color */
+            padding-bottom: 1px;
         }
         .account-details div {
-            font-size: 0.8rem; /* Menu text font size remains at its larger (original) value */
-            margin-bottom: 1px; /* Re-reduced from 4px (or 2px post-font-halving) */
+            font-family: var(--font-mono); /* Applied theme mono font */
+            color: var(--text-primary); /* Applied theme text color */
+            font-size: 0.8rem;
+            margin-bottom: 1px;
             text-align: left;
-            padding-left: 3px; /* Re-reduced from 5px */
+            padding-left: 3px;
         }
         .account-details div:last-child {
             margin-bottom: 0;
         }
 
         .avatar-circle {
-            width: 30px; /* Re-reduced from 60px */
-            height: 30px; /* Re-reduced from 60px */
-            background-color: #ecf0f1;
+            width: 30px;
+            height: 30px;
+            background-color: var(--bg-panel); /* Themed background */
             border-radius: 50%;
             background-size: cover;
             background-position: center;
-            margin-bottom: 3px; /* Re-reduced from 5px */
-            border: 1px solid white; /* Re-reduced from 2px */
+            margin-bottom: 3px;
+            border: 2px solid var(--accent-cyan); /* Themed border */
         }
         .menu-button {
             display: flex;
@@ -119,14 +132,40 @@
             justify-content: center;
             width: 100%;
             height: 100%;
+            background-color: transparent; /* Ensure button itself is transparent */
+            border: none; /* Remove default button border */
+            color: var(--text-primary); /* Text color for span inside button */
+            padding: 0; /* Remove default button padding */
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
         }
-        .menu-button svg {
-            width: 16px; /* Re-reduced from 24px */
-            height: 16px; /* Re-reduced from 24px */
-            margin-bottom: 2px; /* Re-reduced from 4px */
+        .menu-button:hover {
+            background-color: var(--accent-cyan);
+            color: var(--bg-main); /* Dark text on hover */
+        }
+        .menu-button:hover svg { /* Target SVG on button hover */
+            stroke: var(--bg-main); /* Dark stroke for SVG */
+            fill: var(--bg-main); /* Also fill if SVGs use fill */
+        }
+        .menu-button:active {
+            background-color: var(--accent-yellow);
+            color: var(--bg-main);
+        }
+        .menu-button:active svg {
+             stroke: var(--bg-main);
+             fill: var(--bg-main);
         }
 
-        /* builds */
+        .menu-button svg {
+            width: 16px;
+            height: 16px;
+            margin-bottom: 2px;
+            stroke: var(--accent-cyan); /* Default icon color */
+            /* fill: var(--accent-cyan); */ /* Uncomment if SVGs use fill instead of/as well as stroke */
+            transition: stroke 0.2s ease-in-out, fill 0.2s ease-in-out;
+        }
+
+        /* builds (image URLs remain, other properties like bg-color can be fallbacks) */
         .city-build {
             background-position: center;
             background-image: url('../../../public/ofices/cama-alta.png');
@@ -140,3 +179,20 @@
         .gobiernoBuild {background-image: url('../../../public/ofices/gobierno-alta.png');}
         .exploracionBuild {background-image: url('../../../public/ofices/exploracion-alta.png');}
         .hotelBuild {background-image: url('../../../public/ofices/home-alta.png');}
+
+        /* Basic Webkit scrollbar styling */
+        ::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+          background: var(--bg-main);
+        }
+        ::-webkit-scrollbar-thumb {
+          background-color: var(--color-metal);
+          border-radius: 4px;
+          border: 1px solid var(--bg-main);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background-color: var(--color-metal-light);
+        }
