@@ -10,6 +10,7 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow: hidden; /* Prevent main container from scrolling */
         }
         .space-map {
             background-position: center;
