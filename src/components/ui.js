@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from 'react';
 import "../app/css/ui.css";
 import officeData from '../data/officeData';

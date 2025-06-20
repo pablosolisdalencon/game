@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+"use client";
+import React, { useEffect, useMemo } from 'react'; // Added useMemo
 import '../app/css/GameDisplayModal.css';
 import { minigameStyles } from '../data/gameSettings.js';
 import { locationSettings } from '../data/locationVisuals.js';
@@ -7,36 +8,44 @@ import TowerDefenseGame from './minigames/TowerDefenseGame';
 import SurvivalGame from './minigames/SurvivalGame';
 
 const GameDisplayModal = ({ mission, onClose }) => {
-  useEffect(() => {
-    if (mission) {
-      const style = minigameStyles[mission.minigameType];
-      const visuals = locationSettings[mission.location];
+  // useMemo to prevent re-calculating style and visuals on every render unless mission changes
+  const currentGameStyle = useMemo(() => {
+    if (!mission) return null;
+    return minigameStyles[mission.minigameType];
+  }, [mission]);
 
+  const currentLocationVisuals = useMemo(() => {
+    if (!mission) return null;
+    return locationSettings[mission.location];
+  }, [mission]);
+
+  useEffect(() => {
+    if (mission && currentGameStyle && currentLocationVisuals) {
       console.log(`--- Settings for Mission: ${mission.name} ---`);
       console.log("Minigame Type:", mission.minigameType);
-      console.log("Selected Minigame Styles:", style);
+      console.log("Selected Minigame Styles:", currentGameStyle);
       console.log("Location:", mission.location);
-      console.log("Selected Location Visuals:", visuals);
+      console.log("Selected Location Visuals:", currentLocationVisuals);
       console.log("------------------------------------------");
     }
-  }, [mission]);
+  }, [mission, currentGameStyle, currentLocationVisuals]);
 
   if (!mission) {
     return null;
   }
 
   const renderMinigame = () => {
-    // These settings would eventually be passed down to the actual game components
-    // const gameStyle = minigameStyles[mission.minigameType];
-    // const environmentVisuals = locationSettings[mission.location];
+    if (!currentGameStyle || !currentLocationVisuals) {
+      return <p>Loading game settings...</p>; // Or some other placeholder
+    }
 
     switch (mission.minigameType) {
       case 'Asteroids':
-        return <AsteroidsGame mission={mission} onGameFinish={onClose} />;
+        return <AsteroidsGame mission={mission} onGameFinish={onClose} styleProps={currentGameStyle} visualProps={currentLocationVisuals} />;
       case 'Tower Defense':
-        return <TowerDefenseGame mission={mission} onGameFinish={onClose} />;
+        return <TowerDefenseGame mission={mission} onGameFinish={onClose} styleProps={currentGameStyle} visualProps={currentLocationVisuals} />;
       case 'Survival':
-        return <SurvivalGame mission={mission} onGameFinish={onClose} />;
+        return <SurvivalGame mission={mission} onGameFinish={onClose} styleProps={currentGameStyle} visualProps={currentLocationVisuals} />;
       default:
         return <p>Unknown Minigame Type: {mission.minigameType}</p>;
     }
@@ -45,13 +54,14 @@ const GameDisplayModal = ({ mission, onClose }) => {
   return (
     <div className="game-modal-overlay">
       <div className="game-modal-content">
-        <h2>Game Display: {mission.name}</h2>
+        <div className="game-modal-header">
+          <h2>{mission.name}</h2>
+          <p className="mission-subtitle">Engage: {mission.minigameType} on {mission.location}</p>
+        </div>
         <div className="minigame-area">
           {renderMinigame()}
         </div>
-        {/* The onClose is now primarily triggered from within the minigames */}
-        {/* <p>Minigame Type: {mission.minigameType}</p> */}
-        {/* <button onClick={onClose}>Cerrar Juego (Fallback)</button> */}
+        {/* Fallback close button is removed as per previous plan; minigames handle exit. */}
       </div>
     </div>
   );

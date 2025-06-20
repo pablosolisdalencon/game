@@ -83,6 +83,33 @@
             padding: 5px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Sombra suave */
         }
+
+        /* Account Details Specific Styling */
+        .slot-menu.account-details {
+            background-color: #1c6ca7; /* Slightly different shade for emphasis */
+            justify-content: flex-start; /* Align items to top */
+            padding: 10px;
+        }
+        .account-details .menu-header {
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #aaddff; /* Lighter blue for header */
+            text-transform: uppercase;
+            border-bottom: 1px solid #3a90c7;
+            padding-bottom: 4px;
+        }
+        .account-details div { /* For each eWave/mineral line */
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+            text-align: left;
+            padding-left: 5px;
+        }
+        .account-details div:last-child {
+            margin-bottom: 0;
+        }
+
+
         .avatar-circle {
             width: 60px; /* Tamaño del círculo del avatar */
             height: 60px;

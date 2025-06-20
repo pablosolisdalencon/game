@@ -4,37 +4,139 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.6); /* Slightly darker overlay */
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding: 20px; /* Add padding for smaller screens */
 }
 
 .modal-content {
   background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  max-width: 500px;
-  width: 80%;
-  text-align: center;
+  padding: 25px;
+  border-radius: 10px; /* Slightly larger radius */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* More pronounced shadow */
+  width: 100%; /* Responsive width */
+  max-width: 600px; /* Increased max-width */
+  text-align: left; /* Align text to left for better readability */
+  max-height: 90vh; /* Max height */
+  overflow-y: auto; /* Scroll if content overflows */
 }
 
 .modal-content h2 {
   margin-top: 0;
+  margin-bottom: 15px; /* Space below title */
+  font-size: 1.8em; /* Larger title */
+  color: #333;
+  text-align: center; /* Center office name */
 }
 
-.modal-content button {
+.modal-content .office-description {
+  margin-bottom: 20px;
+  font-size: 1em;
+  line-height: 1.6;
+  color: #555;
+}
+
+/* Mission List Styling */
+.mission-list {
+  margin-top: 20px;
+  border-top: 1px solid #eee; /* Separator */
+  padding-top: 15px;
+}
+
+.mission-list h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.4em;
+  color: #444;
+}
+
+.mission-item {
+  border: 1px solid #e0e0e0;
+  padding: 15px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: #f9f9f9;
+  transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.mission-item:hover {
+  background-color: #f0f0f0;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.mission-title {
+  font-weight: bold;
+  font-size: 1.15em; /* Slightly larger */
+  color: #0056b3; /* Theme color for title */
+  margin-bottom: 5px;
+}
+
+.mission-item div { /* For location and reward lines */
+  font-size: 0.95em;
+  color: #666;
+  margin-bottom: 3px;
+}
+
+/* Expanded Mission Details */
+.mission-detail {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #e9ecef; /* Different background */
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+}
+
+.mission-detail p { /* Mission description text */
+  font-size: 0.9em;
+  line-height: 1.5;
+  color: #343a40;
+  white-space: pre-wrap; /* Respect newlines in description */
+}
+
+/* Buttons Styling */
+.modal-button {
   background-color: #007bff;
   color: white;
   border: none;
-  padding: 10px 15px;
-  border-radius: 4px;
+  padding: 10px 18px; /* Adjusted padding */
+  border-radius: 5px; /* Consistent radius */
   cursor: pointer;
-  margin-top: 15px;
+  margin-top: 10px; /* Default top margin */
+  font-size: 0.95em;
+  transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
-.modal-content button:hover {
+.modal-button:hover {
   background-color: #0056b3;
+  transform: translateY(-1px);
+}
+
+.modal-button.secondary { /* For hide button or less prominent actions */
+  background-color: #6c757d;
+}
+
+.modal-button.secondary:hover {
+  background-color: #5a6268;
+}
+
+.mission-detail .modal-button { /* Buttons inside mission detail */
+  margin-right: 10px; /* Space between buttons if inline */
+}
+
+
+/* Close button at the bottom of the modal */
+.modal-content > .modal-button { /* Direct child button, for the main close button */
+  display: block; /* Make it block to take full width or center it */
+  width: fit-content;
+  margin-left: auto; /* Center if block and width is fit-content */
+  margin-right: auto;
+  margin-top: 25px; /* More space before main close */
+  background-color: #dc3545; /* Red for main close */
+}
+.modal-content > .modal-button:hover {
+  background-color: #c82333;
 }
