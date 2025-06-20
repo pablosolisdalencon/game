@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef, useCallback } from 'react'; // Added useCallback
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { usePlayerAccount } from '../../context/PlayerAccountContext';
 import VirtualJoystick from '../controls/VirtualJoystick';
 import styles from './AsteroidsGame.module.css';
@@ -25,9 +25,9 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
     x: 400, y: 300, angle: -Math.PI / 2, velocity: { x: 0, y: 0 },
     rotationSpeed: 0.08, thrustPower: 0.15, friction: 0.985,
     radius: 15, color: 'cyan',
-    isHit: false, // Initialize isHit to false
+    isHit: false,
     isVulnerable: true,
-    joystickAngle: 0, joystickIntensity: 0, isFiring: false,
+    joystickAngle: -Math.PI / 2, joystickIntensity: 0, isFiring: false,
   });
   const asteroidsRef = useRef([]);
   const projectilesRef = useRef([]);
@@ -43,6 +43,7 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
   const [showClaimButton, setShowClaimButton] = useState(false);
   const [currentObjectivesCompleted, setCurrentObjectivesCompleted] = useState(0);
   const [targetObjectivesToDefeat, setTargetObjectivesToDefeat] = useState(0);
+  const [objectivesCompleted, setObjectivesCompleted] = useState(false); // Boolean flag for final reward logic
 
   const gameContainerStyle = {
     width: '100%', height: '100%',
@@ -60,7 +61,7 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
     boxShadow: '0 0 15px rgba(0,0,0,0.7)', textTransform: 'uppercase',
   };
 
-  function checkCircleCollision(circle1, circle2) { /* ... (same) ... */
+  function checkCircleCollision(circle1, circle2) {
     if (!circle1 || !circle2) return false;
     const dx = circle1.x - circle2.x;
     const dy = circle1.y - circle2.y;
@@ -78,12 +79,12 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
         radius: Math.random() * 1.5, alpha: Math.random() * 0.5 + 0.2,
       });
     }
-  }, []); // Empty dependency array as it only uses args or globally defined NUM_STARS
+  }, []);
 
-  function createAsteroid(canvas, size, position) { /* ... (same, uses playerRef.current for proximity check) ... */
+  const createAsteroid = useCallback((canvas, size, position) => {
     let x, y;
     if (!canvas) {
-        console.warn("CreateAsteroid: Canvas not ready for dimension calculations.");
+        console.warn("CreateAsteroid: Canvas not available for dimension calculations.");
         x = Math.random() * 800; y = Math.random() * 600;
     } else if (position) {
       x = position.x; y = position.y;
@@ -109,8 +110,9 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
       color: styleProps?.asteroidColor || 'grey',
       sides: Math.floor(Math.random() * 3) + 5,
     };
-  }
-  function createParticles(count, startX, startY, baseColor, options = {}) { /* ... (same) ... */
+  }, [styleProps?.asteroidColor]);
+
+  const createParticles = useCallback((count, startX, startY, baseColor, options = {}) => {
     const {
       speedRange = [0.5, 2], lifespanRange = [30, 60], radiusRange = [1, 3],
       emissionAngle, angleSpread = Math.PI * 2
@@ -128,9 +130,9 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
         color: baseColor, lifespan: lifespan, currentLifespan: lifespan, alpha: 1,
       });
     }
-  }
+  }, []);
 
-  const handleJoystickMove = (angle, intensity) => { /* ... (same) ... */
+  const handleJoystickMove = useCallback((angle, intensity) => {
     if (!playerRef.current || gameOver) return;
     const player = playerRef.current;
     player.joystickAngle = angle; player.joystickIntensity = intensity;
@@ -141,16 +143,18 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
     } else {
       player.velocity.x = 0; player.velocity.y = 0;
     }
-  };
-  const handleJoystickEnd = () => { /* ... (same) ... */
+  }, [gameOver]);
+
+  const handleJoystickEnd = useCallback(() => {
     if (!playerRef.current || gameOver) return;
     playerRef.current.joystickIntensity = 0;
     playerRef.current.velocity.x = 0; playerRef.current.velocity.y = 0;
-  };
-  const handleFireButtonDown = () => { if(!gameOver && playerRef.current) playerRef.current.isFiring = true; };
-  const handleFireButtonUp = () => { if(playerRef.current) playerRef.current.isFiring = false; };
+  }, [gameOver]);
 
-  const triggerShot = () => { /* ... (same) ... */
+  const handleFireButtonDown = useCallback(() => { if(!gameOver && playerRef.current) playerRef.current.isFiring = true; }, [gameOver]);
+  const handleFireButtonUp = useCallback(() => { if(playerRef.current) playerRef.current.isFiring = false; }, []);
+
+  const triggerShot = useCallback(() => {
     if (!playerRef.current || !canvasRef.current || gameOver) return;
     if (performance.now() - lastShotTimeRef.current > FIRE_RATE_COOLDOWN_MS) {
       const p = playerRef.current;
@@ -162,9 +166,9 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
       });
       lastShotTimeRef.current = performance.now();
     }
-  };
+  }, [gameOver, styleProps?.laserColor, styleProps?.laserWidth]);
 
-  // Main Game Loop and Setup Effect
+  // Main Game Setup and Loop Effect
   useEffect(() => {
     if (!mission || !styleProps || !visualProps) {
       console.warn("AsteroidsGame: Essential props missing for main setup."); return;
@@ -178,25 +182,20 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
       console.error("AsteroidsGame: Failed to get canvas context."); return;
     }
 
-    // --- Full Game State Reset on Mission/Props Change ---
+    // --- Full Game State Reset ---
     setScore(0); setMineralsFound({ tamita: 0, janita: 0, elenita: 0 });
     setGameOver(false); setGameMessage(""); setShowClaimButton(false);
+    setObjectivesCompleted(false);
     setCurrentObjectivesCompleted(0);
     setTargetObjectivesToDefeat(mission.objectives > 0 ? mission.objectives * 4 : 4);
-
-    // Player initialization is now part of resizeCanvasLogic, called below
-
     projectilesRef.current = []; particlesRef.current = [];
     lastShotTimeRef.current = 0;
 
-    // --- Resize Logic ---
     const resizeCanvasLogic = () => {
         if (!canvasRef.current || !canvasRef.current.parentElement) {
             console.warn("resizeCanvasLogic: Canvas or parentElement not available.");
-            // Set to fallback if parent not available during an untimely resize
             if(canvasRef.current) {
-                canvasRef.current.width = 800;
-                canvasRef.current.height = 600;
+                canvasRef.current.width = 800; canvasRef.current.height = 600;
             }
             return;
         }
@@ -208,35 +207,32 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
         if (canvas.width !== newWidth || canvas.height !== newHeight) {
             canvas.width = newWidth;
             canvas.height = newHeight;
-            console.log(`Canvas resized to: ${canvas.width}x${canvas.height}`);
         }
 
-        // Initialize/Re-initialize Player state relative to canvas size
         playerRef.current = {
             ...playerRef.current,
             x: canvas.width / 2, y: canvas.height / 2,
             color: styleProps?.playerShipColor || 'cyan',
             angle: -Math.PI / 2, velocity: { x: 0, y: 0 },
-            isHit: false, // CRITICAL: Reset isHit status
-            isVulnerable: true, // Reset vulnerability
+            isHit: false,
+            isVulnerable: true,
             joystickAngle: -Math.PI / 2, joystickIntensity: 0, isFiring: false,
         };
 
-        // Re-initialize asteroids and stars as their positions depend on canvas size
         asteroidsRef.current = [];
         const numInitialAsteroids = mission.objectives > 0 ? mission.objectives : 1;
         for (let i = 0; i < numInitialAsteroids; i++) {
             asteroidsRef.current.push(createAsteroid(canvas, ASTEROID_MAX_SIZE));
         }
-        initializeStars(canvas, starsRef, visualProps); // Use the useCallback version
+        initializeStars(canvas, starsRef, visualProps);
     };
 
-    resizeCanvasLogic(); // Initial call to set size and initialize player/asteroids/stars
+    resizeCanvasLogic();
+    window.addEventListener('resize', resizeCanvasLogic);
 
-    // --- Drawing Functions ---
     function drawPlayer(ctx) {
         const player = playerRef.current;
-        if (!player || player.isHit) return; // Player disappears if hit
+        if (!player || player.isHit) return;
 
         ctx.save();
         ctx.translate(player.x, player.y); ctx.rotate(player.angle);
@@ -263,7 +259,7 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
             ctx.restore();
         }
     }
-    function drawAsteroid(ctx, ast) { /* ... (same) ... */
+    function drawAsteroid(ctx, ast) {
         if(!ast) return;
         ctx.save();
         ctx.translate(ast.x, ast.y); ctx.rotate(ast.angle);
@@ -285,7 +281,7 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
         }
         ctx.restore();
     }
-    function drawProjectile(ctx, proj) { /* ... (same) ... */
+    function drawProjectile(ctx, proj) {
         if(!proj) return;
         ctx.save();
         ctx.translate(proj.x, proj.y);
@@ -297,7 +293,7 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
         ctx.stroke();
         ctx.shadowBlur = 0; ctx.restore();
     }
-    function drawStarfield(ctx) { /* ... (same) ... */
+    function drawStarfield(ctx) {
         if (!starsRef.current) return;
         starsRef.current.forEach(star => {
             if(!star) return;
@@ -307,7 +303,7 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
             ctx.fill();
         });
     }
-    function drawGrid(ctx) { /* ... (same) ... */
+    function drawGrid(ctx) {
          if (!visualProps?.gridColor) return;
         const gridSize = 50;
         ctx.strokeStyle = visualProps.gridColor; ctx.lineWidth = 0.5;
@@ -316,7 +312,7 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
         for (let y = 0; y <= canvas.height; y += gridSize) { ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); }
         ctx.stroke();
     }
-    function drawAtmosphericHaze(ctx) { /* ... (same) ... */
+    function drawAtmosphericHaze(ctx) {
          if (visualProps?.fogDensity > 0 && visualProps?.primaryColor) {
             const gradient = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 0, canvas.width/2, canvas.height/2, canvas.width/2);
             let rgbaColor = visualProps.primaryColor.replace('rgb(', 'rgba(').replace(')', `, ${visualProps.fogDensity * 0.5})`);
@@ -329,7 +325,7 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
             ctx.fillStyle = gradient; ctx.fillRect(0,0, canvas.width, canvas.height);
         }
     }
-    function drawParticle(ctx, particle) { /* ... (same) ... */
+    function drawParticle(ctx, particle) {
         if(!particle) return;
         ctx.save();
         ctx.globalAlpha = particle.alpha > 0 ? particle.alpha : 0;
@@ -337,7 +333,7 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
         ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2); ctx.fill();
         ctx.globalAlpha = 1.0; ctx.restore();
     }
-    function drawUI(ctx, canvas) { /* ... (same) ... */
+    function drawUI(ctx, canvas) {
         ctx.fillStyle = styleProps?.scoreColor || "white";
         const baseUiFontSize = styleProps?.uiFontSize || 20;
         const uiFont = `bold ${baseUiFontSize / 2}px ${styleProps?.font || 'Electrolize, sans-serif'}`;
@@ -368,9 +364,10 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
             animationFrameIdRef.current = requestAnimationFrame(gameLoop); return;
         }
         const p = playerRef.current;
+        localGameOver = gameOver;
 
-        if (!localGameOver) { /* ... (All game logic) ... */
-            if (!p.isHit) { /* Player movement */
+        if (!localGameOver) {
+            if (!p.isHit) {
                 if (p.joystickIntensity > 0.1) {
                     let diff = p.joystickAngle - p.angle;
                     while (diff < -Math.PI) diff += 2 * Math.PI;
@@ -397,7 +394,7 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
 
             if (p.isFiring) triggerShot();
 
-            asteroidsRef.current.forEach(ast => { /* ... (asteroid movement) ... */
+            asteroidsRef.current.forEach(ast => {
                 if(!ast) return;
                 ast.angle += ast.rotationSpeed;
                 ast.x += ast.velocity.x; ast.y += ast.velocity.y;
@@ -406,12 +403,12 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
                 if (ast.y < 0 - ast.radius) ast.y = canvas.height + ast.radius;
                 if (ast.y > canvas.height + ast.radius) ast.y = 0 - ast.radius;
             });
-            projectilesRef.current.forEach(proj => { /* ... (projectile movement) ... */
+            projectilesRef.current.forEach(proj => {
                  if(!proj) return;
                  proj.x += proj.velocity.x; proj.y += proj.velocity.y;
             });
 
-            for (let i = projectilesRef.current.length - 1; i >= 0; i--) { /* Projectile lifespan ... */
+            for (let i = projectilesRef.current.length - 1; i >= 0; i--) {
                  const proj = projectilesRef.current[i];
                  if(!proj) continue;
                 if (performance.now() - proj.birthTime > PROJECTILE_LIFESPAN_MS ||
@@ -420,7 +417,7 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
                 }
             }
 
-            for (let i = projectilesRef.current.length - 1; i >= 0; i--) { /* Projectile vs Asteroid collision ... */
+            for (let i = projectilesRef.current.length - 1; i >= 0; i--) {
                 const proj = projectilesRef.current[i];
                 if (!proj) continue;
                 for (let j = asteroidsRef.current.length - 1; j >= 0; j--) {
@@ -449,7 +446,7 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
                 }
             }
 
-            if (!p.isHit && p.isVulnerable) { /* Player vs Asteroid collision ... */
+            if (!p.isHit && p.isVulnerable) {
                  for (let j = asteroidsRef.current.length - 1; j >= 0; j--) {
                     const ast = asteroidsRef.current[j];
                      if (!ast) continue;
@@ -463,14 +460,14 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
                 }
             }
 
-            if (!gameOver && currentObjectivesCompleted >= targetObjectivesToDefeat && targetObjectivesToDefeat > 0) {
+            if (!localGameOver && currentObjectivesCompleted >= targetObjectivesToDefeat && targetObjectivesToDefeat > 0) {
                 setGameMessage("MISSION COMPLETE!");
                 setObjectivesCompleted(true);
                 setGameOver(true); localGameOver = true;
             }
         }
 
-        for (let i = particlesRef.current.length - 1; i >= 0; i--) { /* Update Particles ... */
+        for (let i = particlesRef.current.length - 1; i >= 0; i--) {
             const particle = particlesRef.current[i];
             if(!particle) continue;
             particle.x += particle.velocity.x; particle.y += particle.velocity.y;
@@ -486,7 +483,7 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
         drawStarfield(ctx); drawGrid(ctx); drawAtmosphericHaze(ctx);
         particlesRef.current.forEach(particle => drawParticle(ctx, particle));
 
-        if (!playerRef.current.isHit || !localGameOver) drawPlayer(ctx, p);
+        if (!playerRef.current.isHit || !localGameOver) drawPlayer(ctx);
         asteroidsRef.current.forEach(ast => drawAsteroid(ctx, ast));
         projectilesRef.current.forEach(proj => drawProjectile(ctx, proj));
 
@@ -495,61 +492,14 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
         animationFrameIdRef.current = requestAnimationFrame(gameLoop);
     }
 
-    // resizeCanvasLogic(); // Call after defining gameLoop and other draw functions.
-    // window.addEventListener('resize', resizeCanvasLogic);
-
     animationFrameIdRef.current = requestAnimationFrame(gameLoop);
     return () => {
         if (animationFrameIdRef.current) {
             cancelAnimationFrame(animationFrameIdRef.current);
         }
-        // window.removeEventListener('resize', resizeCanvasLogic);
+        window.removeEventListener('resize', resizeCanvasLogic);
     };
-  }, [mission, styleProps, visualProps]); // Main game setup effect
-
-  // Separate useEffect for resize handling to avoid re-running full game setup on resize
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const resizeCanvasLogic = () => {
-      if (!canvasRef.current || !canvasRef.current.parentElement) {
-        console.warn("resizeCanvasLogic: Canvas or parentElement not available.");
-        // Fallback if parent not available during an untimely resize
-        if(canvasRef.current) { // Check again if canvasRef.current became null
-            canvasRef.current.width = 800;
-            canvasRef.current.height = 600;
-        }
-        return;
-      }
-      const parent = canvas.parentElement;
-      const newWidth = parent.clientWidth;
-      const newHeight = parent.clientHeight;
-
-      if (canvas.width !== newWidth || canvas.height !== newHeight) {
-        canvas.width = newWidth;
-        canvas.height = newHeight;
-        console.log(`Canvas resized to: ${canvas.width}x${canvas.height}`);
-
-        // Re-center player
-        if (playerRef.current) {
-          playerRef.current.x = canvas.width / 2;
-          playerRef.current.y = canvas.height / 2;
-        }
-        // Re-initialize stars
-        initializeStars(canvas, starsRef, visualProps);
-        // Note: Active asteroids, projectiles, particles are not re-scaled/re-positioned here.
-        // This would require more complex logic if desired during an active game resize.
-      }
-    };
-
-    resizeCanvasLogic(); // Initial call
-    window.addEventListener('resize', resizeCanvasLogic);
-    return () => {
-      window.removeEventListener('resize', resizeCanvasLogic);
-    };
-  }, [visualProps, initializeStars]); // visualProps if stars depend on it, initializeStars is memoized by useCallback
-
+  }, [mission, styleProps, visualProps, initializeStars, createAsteroid, createParticles, triggerShot, score, currentObjectivesCompleted, targetObjectivesToDefeat, gameOver, gameMessage, mineralsFound]); // Added missing React states to dependency array
 
   useEffect(() => {
     if (gameOver) { setShowClaimButton(true);
@@ -564,8 +514,7 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
     } else {
       setShowClaimButton(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameOver, currentObjectivesCompleted, targetObjectivesToDefeat, objectivesCompleted]); // Added objectivesCompleted
+  }, [gameOver, currentObjectivesCompleted, targetObjectivesToDefeat, gameMessage, objectivesCompleted]);
 
   const handleClaimAndExit = () => {
     if (objectivesCompleted) {
@@ -580,7 +529,7 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
 
   return (
     <div style={gameContainerStyle}>
-      <canvas ref={canvasRef} className={styles.gameCanvas} /> {/* Added className */}
+      <canvas ref={canvasRef} className={styles.gameCanvas} />
       {!gameOver && (
         <>
           <div className={styles.joystickWrapper}>
@@ -605,60 +554,3 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
 };
 
 export default AsteroidsGame;
-
-[end of src/components/minigames/AsteroidsGame.js]
-
-[start of src/components/minigames/AsteroidsGame.module.css]
-.joystickWrapper {
-  position: absolute;
-  bottom: 30px; /* Increased from 20px */
-  left: 30px;  /* Increased from 20px */
-  z-index: 20; /* Ensure joystick is above canvas, but below potential modal overlays */
-}
-
-.fireButton {
-  position: absolute;
-  bottom: 30px; /* Increased */
-  right: 30px; /* Increased */
-  z-index: 20;
-  width: 80px; /* Fixed size for easier tapping */
-  height: 80px;
-  background-color: var(--accent-red, #ff4f4f);
-  color: var(--text-primary, white);
-  font-family: var(--font-header, 'Aldrich', sans-serif);
-  font-size: 1rem; /* Adjusted for button size */
-  border: 2px solid var(--color-metal-light, #7f7f81);
-  border-radius: 50%; /* Circular button */
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0 0 10px var(--accent-red, #ff4f4f), inset 0 0 8px rgba(0,0,0,0.4);
-  transition: background-color 0.1s ease, transform 0.1s ease;
-}
-
-.fireButton:active {
-  background-color: var(--accent-yellow, #ffd700);
-  color: var(--bg-main, black);
-  transform: scale(0.92);
-  box-shadow: 0 0 15px var(--accent-yellow, #ffd700);
-}
-
-/* Style for the game UI text drawn on canvas, if needed via class (not directly applicable here) */
-.gameUiText {
-  font-family: var(--font-mono);
-  fill: var(--text-primary);
-}
-
-.gameOverMessage {
-  font-family: var(--font-header);
-  fill: var(--accent-red);
-}
-
-.gameCanvas { /* Ensure canvas fills its container if gameContainerStyle is used on parent */
-    display: block; /* Removes extra space below canvas */
-    width: 100%;
-    height: 100%;
-    object-fit: contain; /* Scales down to fit container while maintaining aspect ratio */
-}
-[end of src/components/minigames/AsteroidsGame.module.css]
