@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.9); /* Even darker for cinema mode */
+  background-color: rgba(0, 0, 0, 0.9);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -13,52 +13,52 @@
 }
 
 .game-modal-content {
-  background-color: #1a1a1a; /* Very dark grey, almost black */
-  color: #f0f0f0; /* Off-white text */
-  padding: 20px; /* Standardized padding */
-  border-radius: 12px; /* Smoother radius */
-  border: 1px solid #00aaff; /* Accent border */
-  box-shadow: 0 0 30px rgba(0, 170, 255, 0.5); /* Glowing effect with accent color */
+  background-color: #1a1a1a;
+  color: #f0f0f0;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #00aaff;
+  box-shadow: 0 0 30px rgba(0, 170, 255, 0.5);
   width: 100%;
-  max-width: 1000px; /* Wider for game content */
-  min-height: 70vh; /* Taller */
+  max-width: 1000px;
+  min-height: 70vh;
   display: flex;
   flex-direction: column;
-  /* justify-content: space-between; Removed to allow minigame area to define its size more freely */
   text-align: center;
-  overflow: hidden; /* Prevent scrollbars on the modal itself, minigame-area will scroll if needed */
+  overflow: hidden;
 }
 
 .game-modal-header {
   margin-bottom: 20px;
 }
 
-.game-modal-header h2 {
+.game-modal-header h2 { /* Game Name / Mission Name in GameDisplayModal */
   margin-top: 0;
   margin-bottom: 5px;
-  font-size: 2em; /* Larger title */
-  color: #00aaff; /* Accent color */
+  font-size: 1em; /* Halved from 2em */
+  color: #00aaff;
   font-weight: bold;
 }
 
-.game-modal-header .mission-subtitle {
-  font-size: 1.1em;
-  color: #bbb; /* Subdued color for subtitle */
+.game-modal-header .mission-subtitle { /* "Engage: Minigame on Location" */
+  font-size: 0.55em; /* Halved from 1.1em */
+  color: #bbb;
   margin-bottom: 10px;
 }
 
 .minigame-area {
   flex-grow: 1;
-  display: flex; /* Keep flex to center its direct child (the game itself) */
-  flex-direction: column; /* Allow game to take full width/height of this area */
-  justify-content: flex-start; /* Align game to the top */
-  align-items: stretch; /* Stretch game horizontally */
-  background-color: #101010; /* Slightly different dark shade for game background */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  background-color: #101010;
   border-radius: 8px;
-  padding: 15px; /* Padding within the game area */
-  overflow-y: auto; /* Allow scrolling within the minigame area if its content overflows */
-  margin: 0; /* Removed fixed margin */
-  min-height: 300px; /* Ensure it has some height */
+  padding: 15px;
+  overflow-y: auto;
+  margin: 0;
+  min-height: 300px;
+  /* Text within minigame itself (e.g. "Asteroids Game for..." or canvas text) is styled by the minigame component or canvas drawing logic */
 }
 
 /* Fallback button style if ever used, though minigames have their own exit buttons */
@@ -66,12 +66,12 @@
   background-color: #6c757d;
   color: white;
   border: none;
-  padding: 10px 18px;
+  padding: 10px 18px; /* Padding can remain, as it's about button size not just text */
   border-radius: 5px;
   cursor: pointer;
   margin-top: 20px;
   align-self: center;
-  font-size: 0.95em;
+  font-size: 0.475em; /* Halved from 0.95em */
   transition: background-color 0.2s ease;
 }
 
