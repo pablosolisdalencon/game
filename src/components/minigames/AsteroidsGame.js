@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
 import { usePlayerAccount } from '../../context/PlayerAccountContext';
-import VirtualJoystick from '../controls/VirtualJoystick'; // Import VirtualJoystick
-import styles from './AsteroidsGame.module.css'; // Import CSS module
+import VirtualJoystick from '../controls/VirtualJoystick';
+import styles from './AsteroidsGame.module.css';
 
 const PROJECTILE_SPEED = 7;
 const PROJECTILE_LIFESPAN_MS = 1000;
@@ -22,17 +22,17 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
   const { recordMissionCompletion } = usePlayerAccount();
   const canvasRef = useRef(null);
   const playerRef = useRef({
-    x: 0, y: 0, angle: -Math.PI / 2, velocity: { x: 0, y: 0 },
-    rotationSpeed: 0.08, // Speed of rotation from joystick
-    thrustPower: 0.15, friction: 0.985,
+    x: 400, y: 300, angle: -Math.PI / 2, velocity: { x: 0, y: 0 },
+    rotationSpeed: 0.08, thrustPower: 0.15, friction: 0.985,
     radius: 15, color: 'cyan', isHit: false, isVulnerable: true,
-    joystickAngle: 0, joystickIntensity: 0, isFiring: false, // Joystick and firing states
+    joystickAngle: 0, joystickIntensity: 0, isFiring: false,
   });
   const asteroidsRef = useRef([]);
   const projectilesRef = useRef([]);
   const starsRef = useRef([]);
   const particlesRef = useRef([]);
   const lastShotTimeRef = useRef(0);
+  const animationFrameIdRef = useRef(null); // For storing animation frame ID
 
   const [score, setScore] = useState(0);
   const [mineralsFound, setMineralsFound] = useState({ tamita: 0, janita: 0, elenita: 0 });
@@ -46,29 +46,34 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
     width: '100%', height: '100%',
     backgroundColor: styleProps?.backgroundColor || visualProps?.skyColor || '#000',
     display: 'flex', justifyContent: 'center', alignItems: 'center', boxSizing: 'border-box',
-    position: 'relative', // For overlay button and joystick
+    position: 'relative',
   };
-
-  const claimButtonOverlayStyle = { /* ... (same as before, ensure it's styled well with new fire button) ... */
+  const claimButtonOverlayStyle = {
     position: 'absolute', top: 'calc(50% + 40px)', left: '50%',
     transform: 'translate(-50%, -50%)', padding: '12px 25px',
-    backgroundColor: objectivesCompleted ? (styleProps?.successButtonColor || '#28a745') : (styleProps?.dangerButtonColor || '#dc3545'),
-    color: 'white', border: `2px solid ${objectivesCompleted ? (styleProps?.successButtonBorderColor || '#1e7e34') : (styleProps?.dangerButtonBorderColor || '#bd2130')}`,
-    borderRadius: '8px', cursor: 'pointer', fontSize: '1.1em', zIndex: 30, // Higher z-index for claim button
+    backgroundColor: currentObjectivesCompleted >= targetObjectivesToDefeat && targetObjectivesToDefeat > 0 ? (styleProps?.successButtonColor || '#28a745') : (styleProps?.dangerButtonColor || '#dc3545'),
+    color: 'white', border: `2px solid ${currentObjectivesCompleted >= targetObjectivesToDefeat && targetObjectivesToDefeat > 0 ? (styleProps?.successButtonBorderColor || '#1e7e34') : (styleProps?.dangerButtonBorderColor || '#bd2130')}`,
+    borderRadius: '8px', cursor: 'pointer', fontSize: '1.1em', zIndex: 30,
     fontFamily: styleProps?.font || 'Electrolize, sans-serif',
     boxShadow: '0 0 15px rgba(0,0,0,0.7)', textTransform: 'uppercase',
   };
 
-
-  function checkCircleCollision(circle1, circle2) { /* ... (same) ... */
-     const dx = circle1.x - circle2.x;
+  function checkCircleCollision(circle1, circle2) {
+    if (!circle1 || !circle2) return false; // Guard against undefined objects
+    const dx = circle1.x - circle2.x;
     const dy = circle1.y - circle2.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
     return distance < circle1.radius + circle2.radius;
   }
-  function createAsteroid(canvas, size, position) { /* ... (same) ... */
+
+  function createAsteroid(canvas, size, position) {
     let x, y;
-    if (position) {
+    if (!canvas) { // Guard if canvas is not ready
+        console.warn("CreateAsteroid: Canvas not ready for dimension calculations.");
+        // Fallback spawn, less ideal but prevents crash
+        x = Math.random() * 800;
+        y = Math.random() * 600;
+    } else if (position) {
       x = position.x;
       y = position.y;
     } else {
@@ -80,7 +85,10 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
         default: x = 0 - size; y = Math.random() * canvas.height; break;
       }
     }
-    if (playerRef.current && Math.sqrt((x - playerRef.current.x)**2 + (y - playerRef.current.y)**2) < size + playerRef.current.radius + 100) {
+
+    const player = playerRef.current;
+    // Guard player access and canvas access for positioning
+    if (player && canvas && Math.sqrt((x - player.x)**2 + (y - player.y)**2) < size + player.radius + 100) {
         if(edge === 0 || edge === 2) x = (x + canvas.width/2 + 100) % canvas.width;
         else y = (y + canvas.height/2 + 100) % canvas.height;
     }
@@ -93,8 +101,8 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
       sides: Math.floor(Math.random() * 3) + 5,
     };
   }
-  function createParticles(count, startX, startY, baseColor, options = {}) { /* ... (same) ... */
-     const {
+  function createParticles(count, startX, startY, baseColor, options = {}) {
+    const {
       speedRange = [0.5, 2], lifespanRange = [30, 60], radiusRange = [1, 3],
       emissionAngle, angleSpread = Math.PI * 2
     } = options;
@@ -113,30 +121,29 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
     }
   }
 
-  useEffect(() => { /* ... (state reset, same) ... */
-    if (mission) {
-      setScore(0); setMineralsFound({ tamita: 0, janita: 0, elenita: 0 });
-      setGameOver(false); setGameMessage(""); setShowClaimButton(false);
-      playerRef.current.isHit = false; playerRef.current.isVulnerable = true;
-      playerRef.current.joystickIntensity = 0; playerRef.current.isFiring = false; // Reset joystick states
-      projectilesRef.current = []; particlesRef.current = [];
-      setTargetObjectivesToDefeat(mission.objectives > 0 ? mission.objectives * 4 : 4);
-      setCurrentObjectivesCompleted(0);
-    }
-  }, [mission]);
-
-  // Joystick and Firing handlers
   const handleJoystickMove = (angle, intensity) => {
-    playerRef.current.joystickAngle = angle;
-    playerRef.current.joystickIntensity = intensity;
+    if (!playerRef.current || gameOver) return; // Added gameOver check
+    const player = playerRef.current;
+    player.joystickAngle = angle;
+    player.joystickIntensity = intensity;
+    player.angle = angle;
+    if (intensity > 0.1) {
+      player.velocity.x = Math.cos(angle) * player.speed * intensity;
+      player.velocity.y = Math.sin(angle) * player.speed * intensity;
+    } else {
+      player.velocity.x = 0; player.velocity.y = 0;
+    }
   };
   const handleJoystickEnd = () => {
+    if (!playerRef.current || gameOver) return; // Added gameOver check
     playerRef.current.joystickIntensity = 0;
+    playerRef.current.velocity.x = 0; playerRef.current.velocity.y = 0;
   };
-  const handleFireButtonDown = () => { playerRef.current.isFiring = true; };
-  const handleFireButtonUp = () => { playerRef.current.isFiring = false; };
+  const handleFireButtonDown = () => { if(!gameOver && playerRef.current) playerRef.current.isFiring = true; };
+  const handleFireButtonUp = () => { if(playerRef.current) playerRef.current.isFiring = false; };
 
   const triggerShot = () => {
+    if (!playerRef.current || !canvasRef.current || gameOver) return; // Added guards
     if (performance.now() - lastShotTimeRef.current > FIRE_RATE_COOLDOWN_MS) {
       const p = playerRef.current;
       projectilesRef.current.push({
@@ -150,37 +157,68 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
   };
 
   useEffect(() => {
+    // Guard for essential props before attempting any setup
+    if (!mission || !styleProps || !visualProps) {
+      console.warn("AsteroidsGame: Essential props (mission, styleProps, or visualProps) are missing.");
+      return;
+    }
+
+    if (!canvasRef.current) {
+        console.error("AsteroidsGame: Canvas ref not available for main setup.");
+        return;
+    }
     const canvas = canvasRef.current;
-    if (!canvas || !styleProps || !visualProps || !mission) return;
     const ctx = canvas.getContext('2d');
-    const gameWidth = 800; const gameHeight = 600;
-    canvas.width = gameWidth; canvas.height = gameHeight;
+    if (!ctx) {
+        console.error("AsteroidsGame: Failed to get canvas context.");
+        return;
+    }
 
-    const player = playerRef.current;
-    player.x = canvas.width / 2; player.y = canvas.height / 2;
-    player.color = styleProps?.playerShipColor || 'cyan';
-    player.angle = -Math.PI / 2; player.velocity = { x: 0, y: 0 };
-    player.isHit = false; player.isVulnerable = true;
-    player.joystickIntensity = 0; player.isFiring = false; // Ensure reset here too
+    // Canvas Dimensions (fixed, no parentElement needed for this version)
+    canvas.width = 800;
+    canvas.height = 600;
 
-    asteroidsRef.current = []; /* ... (asteroid init) ... */
+    // --- Full Game State Reset on Mission Change ---
+    setScore(0);
+    setMineralsFound({ tamita: 0, janita: 0, elenita: 0 });
+    setGameOver(false);
+    setGameMessage("");
+    setShowClaimButton(false);
+    setCurrentObjectivesCompleted(0);
+    setTargetObjectivesToDefeat(mission.objectives > 0 ? mission.objectives * 4 : 4);
+
+    playerRef.current = {
+        ...playerRef.current,
+        x: canvas.width / 2, y: canvas.height / 2,
+        color: styleProps?.playerShipColor || 'cyan',
+        angle: -Math.PI / 2, velocity: { x: 0, y: 0 },
+        isHit: false, isVulnerable: true,
+        joystickAngle: -Math.PI / 2, joystickIntensity: 0, isFiring: false,
+    };
+
+    asteroidsRef.current = [];
     const numInitialAsteroids = mission.objectives > 0 ? mission.objectives : 1;
     for (let i = 0; i < numInitialAsteroids; i++) {
       asteroidsRef.current.push(createAsteroid(canvas, ASTEROID_MAX_SIZE));
     }
-    starsRef.current = []; /* ... (starfield init) ... */
-     const starDensity = visualProps?.particleEffect === 'star_dust' ? NUM_STARS * 2 : NUM_STARS;
-    for (let i = 0; i < starDensity; i++) {
-      starsRef.current.push({
-        x: Math.random() * canvas.width, y: Math.random() * canvas.height,
-        radius: Math.random() * 1.5, alpha: Math.random() * 0.5 + 0.2,
-      });
+
+    projectilesRef.current = [];
+    particlesRef.current = [];
+    lastShotTimeRef.current = 0;
+
+    if (starsRef.current.length === 0 || visualProps?.particleEffect || true) {
+        starsRef.current = [];
+        const starDensity = visualProps?.particleEffect === 'star_dust' ? NUM_STARS * 2 : NUM_STARS;
+        for (let i = 0; i < starDensity; i++) {
+        starsRef.current.push({
+            x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+            radius: Math.random() * 1.5, alpha: Math.random() * 0.5 + 0.2,
+        });
+        }
     }
 
-    // Removed window keydown/keyup listeners here
-
-    function drawPlayer(ctx, p) { /* ... (drawPlayer, no keys argument) ... */
-        if (p.isHit && gameOver) return;
+    function drawPlayer(ctx, p) { /* ... (same) ... */
+        if (!p || (p.isHit && gameOver)) return;
         ctx.save();
         ctx.translate(p.x, p.y); ctx.rotate(p.angle);
         ctx.beginPath(); ctx.moveTo(p.radius, 0);
@@ -194,20 +232,20 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
         ctx.shadowBlur = 10; ctx.shadowColor = highlightColor;
         ctx.stroke(); ctx.shadowBlur = 0;
         ctx.restore();
-        // Thrust flame based on joystick intensity
         if (p.joystickIntensity > 0.1 && !gameOver && !p.isHit) {
-             ctx.save();
+            ctx.save();
             ctx.translate(p.x, p.y); ctx.rotate(p.angle);
             const flameColor = styleProps?.thrustFlameColor || 'orange';
             ctx.fillStyle = flameColor; ctx.shadowBlur = 15; ctx.shadowColor = flameColor;
             ctx.beginPath(); ctx.moveTo(-p.radius * 0.4, 0);
-            ctx.lineTo(-p.radius * 1.8, p.radius * 0.5 * p.joystickIntensity); // Scale flame by intensity
+            ctx.lineTo(-p.radius * 1.8, p.radius * 0.5 * p.joystickIntensity);
             ctx.lineTo(-p.radius * 1.8, -p.radius * 0.5 * p.joystickIntensity);
             ctx.closePath(); ctx.fill(); ctx.shadowBlur = 0;
             ctx.restore();
         }
     }
     function drawAsteroid(ctx, ast) { /* ... (same) ... */
+        if(!ast) return;
         ctx.save();
         ctx.translate(ast.x, ast.y); ctx.rotate(ast.angle);
         ctx.beginPath(); ctx.moveTo(ast.radius, 0);
@@ -229,18 +267,21 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
         ctx.restore();
     }
     function drawProjectile(ctx, proj) { /* ... (same) ... */
+        if(!proj) return;
         ctx.save();
         ctx.translate(proj.x, proj.y);
         ctx.rotate(Math.atan2(proj.velocity.y, proj.velocity.x));
         ctx.shadowBlur = 10; ctx.shadowColor = proj.color;
         ctx.beginPath(); ctx.moveTo(0,0);
-        ctx.lineTo(-proj.length, 0);
-        ctx.strokeStyle = proj.color; ctx.lineWidth = proj.radius * 2;
+        ctx.lineTo(-(proj.length || 10), 0); // Added default length for safety
+        ctx.strokeStyle = proj.color; ctx.lineWidth = (proj.radius || 2) * 2;
         ctx.stroke();
         ctx.shadowBlur = 0; ctx.restore();
     }
     function drawStarfield(ctx) { /* ... (same) ... */
+        if (!starsRef.current) return;
         starsRef.current.forEach(star => {
+            if(!star) return;
             ctx.beginPath();
             ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
             ctx.fillStyle = `rgba(255, 255, 220, ${star.alpha * (0.5 + Math.abs(Math.sin(performance.now() / (1000 + star.radius * 100))))})`;
@@ -270,6 +311,7 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
         }
     }
     function drawParticle(ctx, particle) { /* ... (same) ... */
+        if(!particle) return;
         ctx.save();
         ctx.globalAlpha = particle.alpha > 0 ? particle.alpha : 0;
         ctx.fillStyle = particle.color; ctx.beginPath();
@@ -300,27 +342,27 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
         }
     }
 
-    let animationFrameId;
+    let localGameOver = gameOver; // Use local variable for current frame consistency
+
     function gameLoop() {
+        // Guard at the beginning of the gameLoop
+        if (!canvasRef.current || !playerRef.current || !asteroidsRef.current || !projectilesRef.current || !particlesRef.current || !starsRef.current) {
+            animationFrameIdRef.current = requestAnimationFrame(gameLoop);
+            return;
+        }
         const p = playerRef.current;
 
-        if (!gameOver) {
-            if (!p.isHit) {
-                // Player Rotation from Joystick
-                if (p.joystickIntensity > 0.1) { // Apply rotation only if joystick is meaningfully engaged
-                    // Smooth rotation towards joystick angle
+        if (!localGameOver) {
+            if (!p.isHit) { /* Player movement */
+                if (p.joystickIntensity > 0.1) {
                     let diff = p.joystickAngle - p.angle;
                     while (diff < -Math.PI) diff += 2 * Math.PI;
                     while (diff > Math.PI) diff -= 2 * Math.PI;
-                    // Apply a portion of the difference, adjust multiplier for faster/slower smoothing
-                    p.angle += diff * p.rotationSpeed * p.joystickIntensity; // Intensity can affect rotation speed
+                    p.angle += diff * p.rotationSpeed * p.joystickIntensity;
                 }
-
-                // Player Thrust from Joystick
                 if (p.joystickIntensity > 0.1) {
                     p.velocity.x += Math.cos(p.angle) * p.thrustPower * p.joystickIntensity;
                     p.velocity.y += Math.sin(p.angle) * p.thrustPower * p.joystickIntensity;
-
                     const exhaustX = p.x - Math.cos(p.angle) * (p.radius + 5);
                     const exhaustY = p.y - Math.sin(p.angle) * (p.radius + 5);
                     createParticles(1, exhaustX, exhaustY, styleProps?.thrustColor || 'orange', {
@@ -330,19 +372,16 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
                 }
                 p.velocity.x *= p.friction; p.velocity.y *= p.friction;
                 p.x += p.velocity.x; p.y += p.velocity.y;
-                // Screen Wrap
                 if (p.x < 0 - p.radius) p.x = canvas.width + p.radius;
                 if (p.x > canvas.width + p.radius) p.x = 0 - p.radius;
                 if (p.y < 0 - p.radius) p.y = canvas.height + p.radius;
                 if (p.y > canvas.height + p.radius) p.y = 0 - p.radius;
             }
 
-            // Firing logic based on playerRef.current.isFiring
-            if (p.isFiring) {
-                triggerShot();
-            }
+            if (p.isFiring) triggerShot();
 
             asteroidsRef.current.forEach(ast => { /* ... (asteroid movement) ... */
+                if(!ast) return;
                 ast.angle += ast.rotationSpeed;
                 ast.x += ast.velocity.x; ast.y += ast.velocity.y;
                 if (ast.x < 0 - ast.radius) ast.x = canvas.width + ast.radius;
@@ -351,11 +390,13 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
                 if (ast.y > canvas.height + ast.radius) ast.y = 0 - ast.radius;
             });
             projectilesRef.current.forEach(proj => { /* ... (projectile movement) ... */
+                 if(!proj) return;
                  proj.x += proj.velocity.x; proj.y += proj.velocity.y;
             });
 
-            for (let i = projectilesRef.current.length - 1; i >= 0; i--) { /* Projectile lifespan/off-screen ... */
+            for (let i = projectilesRef.current.length - 1; i >= 0; i--) { /* Projectile lifespan ... */
                  const proj = projectilesRef.current[i];
+                 if(!proj) continue;
                 if (performance.now() - proj.birthTime > PROJECTILE_LIFESPAN_MS ||
                     proj.x < 0 || proj.x > canvas.width || proj.y < 0 || proj.y > canvas.height) {
                 projectilesRef.current.splice(i, 1);
@@ -364,8 +405,10 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
 
             for (let i = projectilesRef.current.length - 1; i >= 0; i--) { /* Projectile vs Asteroid collision ... */
                 const proj = projectilesRef.current[i];
+                if (!proj) continue;
                 for (let j = asteroidsRef.current.length - 1; j >= 0; j--) {
                     const ast = asteroidsRef.current[j];
+                    if (!ast) continue;
                     if (checkCircleCollision(proj, ast)) {
                         projectilesRef.current.splice(i, 1);
                         const originalRadius = ast.radius;
@@ -392,25 +435,29 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
             if (!p.isHit && p.isVulnerable) { /* Player vs Asteroid collision ... */
                  for (let j = asteroidsRef.current.length - 1; j >= 0; j--) {
                     const ast = asteroidsRef.current[j];
+                     if (!ast) continue;
                     if (checkCircleCollision(p, ast)) {
                         p.isHit = true;
                         createParticles(50, p.x, p.y, p.color, { speedRange: [1, 4], lifespanRange: [50, 100], radiusRange: [1, 5] });
                         setGameMessage("PLAYER DESTROYED!");
-                        setGameOver(true);
+                        setGameOver(true); localGameOver = true;
                         break;
                     }
                 }
             }
 
+            // Check victory condition only if game is not already over from player hit
+            // Access React states directly for checking conditions, then call setters
             if (!gameOver && currentObjectivesCompleted >= targetObjectivesToDefeat && targetObjectivesToDefeat > 0) {
                 setGameMessage("MISSION COMPLETE!");
                 setObjectivesCompleted(true);
-                setGameOver(true);
+                setGameOver(true); localGameOver = true;
             }
         }
 
         for (let i = particlesRef.current.length - 1; i >= 0; i--) { /* Update Particles ... */
             const particle = particlesRef.current[i];
+            if(!particle) continue;
             particle.x += particle.velocity.x; particle.y += particle.velocity.y;
             particle.currentLifespan--;
             particle.alpha = Math.max(0, particle.currentLifespan / particle.lifespan);
@@ -424,33 +471,47 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
         drawStarfield(ctx); drawGrid(ctx); drawAtmosphericHaze(ctx);
         particlesRef.current.forEach(particle => drawParticle(ctx, particle));
 
-        if (!playerRef.current.isHit || !gameOver) drawPlayer(ctx, p); // Pass only p, keys are not used in drawPlayer anymore
+        // Use localGameOver for drawing decisions within the same frame gameOver was set
+        if (!playerRef.current.isHit || !localGameOver) drawPlayer(ctx, p);
         asteroidsRef.current.forEach(ast => drawAsteroid(ctx, ast));
         projectilesRef.current.forEach(proj => drawProjectile(ctx, proj));
 
+        // Pass React state `gameOver` to drawUI, so it reflects the most up-to-date state for UI text
         drawUI(ctx, canvas);
 
-        animationFrameId = requestAnimationFrame(gameLoop);
+        animationFrameIdRef.current = requestAnimationFrame(gameLoop);
     }
 
-    gameLoop();
+    animationFrameIdRef.current = requestAnimationFrame(gameLoop); // Initial call
     return () => {
-        cancelAnimationFrame(animationFrameId);
-        // Removed window keydown/keyup listeners here as they are not added in this effect anymore
+        if (animationFrameIdRef.current) {
+            cancelAnimationFrame(animationFrameIdRef.current);
+        }
     };
-  }, [mission, styleProps, visualProps]); // Removed gameOver from dependencies
+  }, [mission, styleProps, visualProps]);
 
   useEffect(() => {
     if (gameOver) { setShowClaimButton(true);
+      // This logic now primarily ensures the correct final message is set if not already.
+      // The actual boolean `objectivesCompleted` state is set when victory condition is met.
       if (currentObjectivesCompleted >= targetObjectivesToDefeat && targetObjectivesToDefeat > 0) {
-          setGameMessage("MISSION COMPLETE!"); setObjectivesCompleted(true);
-      } else if (!gameMessage) { setGameMessage("GAME OVER"); }
-    } else { setShowClaimButton(false); }
+          if(gameMessage !== "MISSION COMPLETE!") setGameMessage("MISSION COMPLETE!"); // Avoid redundant set
+          if(!objectivesCompleted) setObjectivesCompleted(true); // Ensure boolean flag is set
+      } else if (playerRef.current?.isHit && gameMessage !== "PLAYER DESTROYED!") {
+          setGameMessage("PLAYER DESTROYED!");
+      } else if (!gameMessage) {
+          setGameMessage("GAME OVER");
+      }
+    } else {
+      setShowClaimButton(false);
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameOver]);
+  }, [gameOver, currentObjectivesCompleted, targetObjectivesToDefeat]); // gameMessage removed
 
   const handleClaimAndExit = () => {
-    if (objectivesCompleted) { recordMissionCompletion(mission.reward, mineralsFound); }
+    if (objectivesCompleted) { // Use the boolean state here
+      recordMissionCompletion(mission.reward, mineralsFound);
+    }
     onGameFinish();
   };
 
@@ -461,16 +522,20 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
   return (
     <div style={gameContainerStyle}>
       <canvas ref={canvasRef} />
-      <div className={styles.joystickWrapper}>
-        <VirtualJoystick onMove={handleJoystickMove} onEnd={handleJoystickEnd} size={100} knobSize={50} />
-      </div>
-      <button
-        className={styles.fireButton}
-        onTouchStart={handleFireButtonDown} onTouchEnd={handleFireButtonUp}
-        onMouseDown={handleFireButtonDown} onMouseUp={handleFireButtonUp}
-      >
-        FIRE
-      </button>
+      {!gameOver && (
+        <>
+          <div className={styles.joystickWrapper}>
+            <VirtualJoystick onMove={handleJoystickMove} onEnd={handleJoystickEnd} size={100} knobSize={50} />
+          </div>
+          <button
+            className={styles.fireButton}
+            onTouchStart={handleFireButtonDown} onTouchEnd={handleFireButtonUp}
+            onMouseDown={handleFireButtonDown} onMouseUp={handleFireButtonUp}
+          >
+            FIRE
+          </button>
+        </>
+      )}
       {gameOver && showClaimButton && (
         <button onClick={handleClaimAndExit} style={claimButtonOverlayStyle}>
           {objectivesCompleted ? 'Claim Rewards & Exit' : 'Exit'}
