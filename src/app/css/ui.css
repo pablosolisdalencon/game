@@ -6,119 +6,111 @@
             overflow: hidden; /* Para evitar barras de scroll en el contenedor principal */
         }
         .main-container {
-            width: 100vw; /* 100% del ancho de la ventana */
-            height: 100vh; /* 100% del alto de la ventana */
+            width: 100vw;
+            height: 100vh;
             display: flex;
-            flex-direction: column; /* Apila los componentes verticalmente */
+            flex-direction: column;
         }
         .space-map {
             background-position: center;
             background-image: url('../../../public/ofices/spaceMap-alta.png');
             background-size: cover; 
-            height: 40%;
-            background-color: #34495e; /* Color de ejemplo para spaceMap */
+            height: 45%; /* Adjusted from 40% */
+            background-color: #34495e;
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-bottom: 2px solid #2c3e50; /* Borde para separación visual */
+            border-bottom: 2px solid #2c3e50;
         }
         .city-map {
-            height: 40%;
-            background-color: #ecf0f1; /* Color de ejemplo para cityMap */
+            height: 45%; /* Adjusted from 40% */
+            background-color: #ecf0f1;
             display: flex;
-            flex-direction: column; /* Para alinear el contenedor de la cuadrícula */
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 1%; /* Pequeño padding para que no se pegue a los bordes */
-            border-bottom: 2px solid #bdc3c7; /* Borde para separación visual */
+            padding: 1%;
+            border-bottom: 2px solid #bdc3c7;
         }
         .city-map-grid {
             width: 100%;
             height: 100%;
             display: flex;
-            flex-wrap: wrap; /* Permite que los elementos pasen a la siguiente línea */
-            justify-content: space-around; /* Distribuye el espacio entre elementos */
-            align-content: space-around; /* Distribuye el espacio entre líneas */
+            flex-wrap: wrap;
+            justify-content: space-around;
+            align-content: space-around;
         }
         .city-build {
-            /* Cada cityBuild ocupa 18% del contenedor cityMap */
-            /* Con 5 elementos, 5 * 18% = 90%. El 10% restante es para el espacio. */
-            /* Hay 4 espacios entre 5 elementos, 10% / 4 = 2.5% de espacio por hueco */
-            /* Tailwind no maneja esto directamente con 'gap' en porcentajes de esta forma, */
-            /* por lo que 'space-around' en el contenedor padre es una buena aproximación. */
-            /* O se puede usar 'margin' en cada elemento. */
             width: 20%;
             height: 20%;
-            background-color: #95a5a6; /* Color de ejemplo para cityBuild */
+            background-color: #95a5a6;
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 8px; /* Bordes redondeados */
-            font-size: 0.7rem;
+            border-radius: 8px;
+            font-size: 0.35rem; /* Font size remains halved */
             text-align: center;
             margin:2%;
         }
         .menu-container {
-            height: 20%;
-            background-color: #3498db; /* Color de ejemplo para menu */
-            display: flex; /* Alinea los slotMenu horizontalmente */
-            justify-content: space-around; /* Distribuye el espacio */
+            height: 10%; /* Re-reduced from 20% */
+            background-color: #3498db;
+            display: flex;
+            justify-content: space-around;
             align-items: center;
-            padding: 0 1%; /* Padding horizontal */
+            padding: 0 1%;
         }
         .slot-menu {
-            width: 19%; /* Aproximadamente 20%, dejando un pequeño espacio si se usa space-around */
-            height: 90%; /* Un poco menos del 100% para padding visual */
-            background-color: #2980b9; /* Color de ejemplo para slotMenu */
+            width: 19%;
+            height: 85%; /* Re-reduced from 90% */
+            background-color: #2980b9;
             color: white;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border-radius: 10px; /* Bordes redondeados */
-            font-size: 0.8rem;
+            border-radius: 8px; /* Re-reduced from 10px */
+            font-size: 0.8rem; /* Menu text font size remains at its larger (original) value */
             text-align: center;
-            padding: 5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Sombra suave */
+            padding: 2.5px; /* Re-reduced from 5px */
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2); /* Re-reduced from 0 2px 4px */
         }
 
-        /* Account Details Specific Styling */
         .slot-menu.account-details {
-            background-color: #1c6ca7; /* Slightly different shade for emphasis */
-            justify-content: flex-start; /* Align items to top */
-            padding: 10px;
+            background-color: #1c6ca7;
+            justify-content: flex-start;
+            padding: 5px; /* Re-reduced from 10px */
         }
         .account-details .menu-header {
-            font-size: 0.9rem;
+            font-size: 0.9rem; /* Menu text font size remains at its larger (original) value */
             font-weight: bold;
-            margin-bottom: 8px;
-            color: #aaddff; /* Lighter blue for header */
+            margin-bottom: 3px; /* Re-reduced from 8px (or 4px post-font-halving) */
+            color: #aaddff;
             text-transform: uppercase;
             border-bottom: 1px solid #3a90c7;
-            padding-bottom: 4px;
+            padding-bottom: 1px; /* Re-reduced from 4px (or 2px post-font-halving) */
         }
-        .account-details div { /* For each eWave/mineral line */
-            font-size: 0.8rem;
-            margin-bottom: 4px;
+        .account-details div {
+            font-size: 0.8rem; /* Menu text font size remains at its larger (original) value */
+            margin-bottom: 1px; /* Re-reduced from 4px (or 2px post-font-halving) */
             text-align: left;
-            padding-left: 5px;
+            padding-left: 3px; /* Re-reduced from 5px */
         }
         .account-details div:last-child {
             margin-bottom: 0;
         }
 
-
         .avatar-circle {
-            width: 60px; /* Tamaño del círculo del avatar */
-            height: 60px;
-            background-color: #ecf0f1; /* Color de fondo del círculo */
-            border-radius: 50%; /* Hace el div un círculo */
-            background-size: cover; /* Asegura que la imagen cubra el círculo */
-            background-position: center; /* Centra la imagen */
-            margin-bottom: 5px; /* Espacio debajo del avatar */
-            border: 2px solid white; /* Borde blanco para el avatar */
+            width: 30px; /* Re-reduced from 60px */
+            height: 30px; /* Re-reduced from 60px */
+            background-color: #ecf0f1;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            margin-bottom: 3px; /* Re-reduced from 5px */
+            border: 1px solid white; /* Re-reduced from 2px */
         }
         .menu-button {
             display: flex;
@@ -128,10 +120,10 @@
             width: 100%;
             height: 100%;
         }
-        .menu-button svg { /* Estilo para los iconos SVG */
-            width: 24px;
-            height: 24px;
-            margin-bottom: 4px;
+        .menu-button svg {
+            width: 16px; /* Re-reduced from 24px */
+            height: 16px; /* Re-reduced from 24px */
+            margin-bottom: 2px; /* Re-reduced from 4px */
         }
 
         /* builds */
