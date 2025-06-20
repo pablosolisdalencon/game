@@ -1,7 +1,8 @@
+"use client";
 import React, { useState, useEffect } from 'react';
 import { usePlayerAccount } from '../../context/PlayerAccountContext';
 
-const TowerDefenseGame = ({ mission, onGameFinish }) => {
+const TowerDefenseGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
   const { recordMissionCompletion } = usePlayerAccount();
   const [score, setScore] = useState(0);
   const [mineralsFound, setMineralsFound] = useState({ tamita: 0, janita: 0, elenita: 0 });
@@ -9,38 +10,89 @@ const TowerDefenseGame = ({ mission, onGameFinish }) => {
   const [currentWave, setCurrentWave] = useState(0);
   const [baseHealth, setBaseHealth] = useState(100);
   const [enemiesRemainingInWave, setEnemiesRemainingInWave] = useState(0);
-  const [totalObjectives, setTotalObjectives] = useState(mission ? mission.objectives : 10); // e.g. total enemies or waves
+  const [totalObjectives, setTotalObjectives] = useState(mission ? mission.objectives : 10);
   const [objectivesCompleted, setObjectivesCompleted] = useState(0);
   const [waveInProgress, setWaveInProgress] = useState(false);
   const [gameOutcomeMessage, setGameOutcomeMessage] = useState("");
 
   const mineralTypes = ['tamita', 'janita', 'elenita'];
 
-  // Styles
+  // Dynamic Styles
   const gameAreaStyle = {
-    border: '2px solid #555',
-    backgroundColor: '#282c34',
-    color: 'white',
+    border: `2px solid ${visualProps?.borderColor || '#555'}`,
+    backgroundColor: visualProps?.groundTexture ? `url(${visualProps.groundTexture})` : (visualProps?.skyColor || '#282c34'),
+    color: styleProps?.fontColor || 'white',
     padding: '20px',
-    width: '700px',
-    fontFamily: 'Arial, sans-serif',
+    width: '100%',
+    height: '100%',
+    boxSizing: 'border-box',
+    fontFamily: styleProps?.font || 'Arial, sans-serif',
     margin: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
   };
-  const statsContainerStyle = { display: 'flex', justifyContent: 'space-around', marginBottom: '15px' };
-  const conceptualElementsStyle = { display: 'flex', justifyContent: 'space-around', margin: '20px 0', padding: '10px', backgroundColor: '#333942' };
-  const pathStyle = { border: '1px dashed #777', padding: '10px', flexGrow: 1, textAlign: 'center' };
-  const towerStyle = { border: '1px solid green', padding: '10px', margin: '0 5px', backgroundColor: 'darkgreen' };
+
+  const statsContainerStyle = {
+    display: 'flex',
+    justifyContent: 'space-around',
+    marginBottom: '15px',
+    color: styleProps?.fontColor || 'white',
+  };
+
+  const conceptualElementsStyle = {
+    display: 'flex',
+    justifyContent: 'space-around',
+    margin: '20px 0',
+    padding: '10px',
+    backgroundColor: 'rgba(0,0,0,0.2)', // Semi-transparent overlay for elements
+    borderRadius: '5px',
+  };
+
+  const pathStyle = {
+    border: `2px dashed ${styleProps?.pathColor || '#777'}`,
+    padding: '10px',
+    flexGrow: 1,
+    textAlign: 'center',
+    backgroundColor: visualProps?.pathDisplayColor || 'rgba(100,100,100,0.3)',
+  };
+
+  const towerDynamicStyle = {
+    border: `2px solid ${styleProps?.towerColor || 'green'}`,
+    padding: '10px', margin: '0 5px',
+    backgroundColor: styleProps?.towerColor || 'darkgreen',
+    color: styleProps?.fontColor || 'white',
+  };
+
   const buttonContainerStyle = { marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '10px' };
-  const buttonStyle = (disabled) => ({
+
+  const baseButtonStyle = {
     padding: '10px 15px',
-    backgroundColor: disabled ? '#555' : '#007bff',
     color: 'white',
     border: 'none',
     borderRadius: '5px',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    marginRight: '10px', // Added for spacing if multiple buttons
+    cursor: 'pointer',
+    marginRight: '10px',
+    transition: 'background-color 0.2s ease, transform 0.1s ease',
+  };
+
+  const gameActionButtonStyle = (disabled) => ({
+    ...baseButtonStyle,
+    backgroundColor: disabled ? (styleProps?.disabledButtonColor || '#555') : (styleProps?.buttonColor || '#007bff'),
   });
-  const gameOverScreenStyle = { textAlign: 'center', color: 'yellow', fontSize: '1.5em', marginTop: '30px'};
+
+  const claimExitButtonStyle = {
+    ...baseButtonStyle,
+    marginTop: '20px',
+    backgroundColor: gameOutcomeMessage === "Victory!" ? (styleProps?.successButtonColor ||'#28a745') : (styleProps?.dangerButtonColor ||'#dc3545'),
+  };
+
+  const gameOverTextStyle = { // Renamed
+    textAlign: 'center',
+    color: styleProps?.gameOverTextColor || 'yellow',
+    fontSize: '1.5em',
+    marginTop: '30px'
+  };
+
 
   useEffect(() => {
     if (mission) {
@@ -59,26 +111,25 @@ const TowerDefenseGame = ({ mission, onGameFinish }) => {
 
   const handleStartNextWave = () => {
     if (gameOver || waveInProgress) return;
-
     const newWave = currentWave + 1;
     setCurrentWave(newWave);
-    setEnemiesRemainingInWave(newWave * 5); // Example: enemies increase with wave number
+    setEnemiesRemainingInWave(newWave * 5);
     setWaveInProgress(true);
   };
 
   const handleEnemyDefeated = () => {
     if (gameOver || !waveInProgress || enemiesRemainingInWave <= 0) return;
-
     setScore(prev => prev + 5);
     setEnemiesRemainingInWave(prev => prev - 1);
-    setObjectivesCompleted(prev => prev + 1);
+    const newObjectivesCompleted = objectivesCompleted + 1;
+    setObjectivesCompleted(newObjectivesCompleted);
 
-    if (Math.random() < 0.2) { // 20% chance for mineral
+    if (Math.random() < 0.2) {
       const foundMineral = mineralTypes[Math.floor(Math.random() * mineralTypes.length)];
       setMineralsFound(prev => ({ ...prev, [foundMineral]: prev[foundMineral] + 1 }));
     }
 
-    if (objectivesCompleted + 1 >= totalObjectives) {
+    if (newObjectivesCompleted >= totalObjectives) {
       setGameOver(true);
       setGameOutcomeMessage("Victory!");
       setWaveInProgress(false);
@@ -89,7 +140,6 @@ const TowerDefenseGame = ({ mission, onGameFinish }) => {
 
   const handleEnemyReachedBase = () => {
     if (gameOver || !waveInProgress || enemiesRemainingInWave <= 0) return;
-
     const newHealth = baseHealth - 10;
     setBaseHealth(newHealth);
     setEnemiesRemainingInWave(prev => prev - 1);
@@ -111,7 +161,9 @@ const TowerDefenseGame = ({ mission, onGameFinish }) => {
     onGameFinish();
   };
 
-  if (!mission) return <div>Loading mission data...</div>;
+  if (!mission || !styleProps || !visualProps) {
+    return <div>Loading game assets...</div>;
+  }
 
   return (
     <div style={gameAreaStyle}>
@@ -122,38 +174,38 @@ const TowerDefenseGame = ({ mission, onGameFinish }) => {
         <span>Wave: {currentWave}</span>
         <span>Progress: {objectivesCompleted} / {totalObjectives}</span>
       </div>
-      <div>Minerals: {mineralTypes.map(m => `${m.charAt(0).toUpperCase() + m.slice(1)}: ${mineralsFound[m]}`).join(', ')}</div>
+      <div style={{color: styleProps?.fontColor || 'white'}}>Minerals: {mineralTypes.map(m => `${m.charAt(0).toUpperCase() + m.slice(1)}: ${mineralsFound[m]}`).join(', ')}</div>
 
       <div style={conceptualElementsStyle}>
         <div style={pathStyle}>Path (Enemies move here)</div>
-        <div style={towerStyle}>Tower 1</div>
-        <div style={towerStyle}>Tower 2</div>
+        <div style={towerDynamicStyle}>Tower 1</div>
+        <div style={towerDynamicStyle}>Tower 2</div>
       </div>
-      <div style={{textAlign: 'center', margin: '10px 0'}}>Enemies in Wave: {enemiesRemainingInWave}</div>
+      <div style={{textAlign: 'center', margin: '10px 0', color: styleProps?.enemyColor || 'white'}}>Enemies in Wave: {enemiesRemainingInWave}</div>
 
       {!gameOver && (
         <div style={buttonContainerStyle}>
-          <button onClick={handleStartNextWave} style={buttonStyle(waveInProgress || gameOver)} disabled={waveInProgress || gameOver}>
+          <button onClick={handleStartNextWave} style={gameActionButtonStyle(waveInProgress || gameOver)} disabled={waveInProgress || gameOver}>
             Start Next Wave
           </button>
-          <button onClick={handleEnemyDefeated} style={buttonStyle(!waveInProgress || gameOver)} disabled={!waveInProgress || gameOver}>
+          <button onClick={handleEnemyDefeated} style={gameActionButtonStyle(!waveInProgress || gameOver)} disabled={!waveInProgress || gameOver}>
             Simulate Enemy Defeated
           </button>
-          <button onClick={handleEnemyReachedBase} style={buttonStyle(!waveInProgress || gameOver)} disabled={!waveInProgress || gameOver}>
+          <button onClick={handleEnemyReachedBase} style={gameActionButtonStyle(!waveInProgress || gameOver)} disabled={!waveInProgress || gameOver}>
             Simulate Enemy Reached Base
           </button>
         </div>
       )}
 
       {gameOver && (
-        <div style={gameOverScreenStyle}>
+        <div style={gameOverTextStyle}>
           <p>Game Over! Mission: {mission.name} - {gameOutcomeMessage}</p>
           <p>Final Score: {score}</p>
           <p>Waves Survived: {currentWave}</p>
           <p>Minerals Collected: {mineralTypes.map(m => `${m.charAt(0).toUpperCase() + m.slice(1)}: ${mineralsFound[m]}`).join(', ')}</p>
           <button
             onClick={handleClaimAndExit}
-            style={{...buttonStyle(false), marginTop: '20px', backgroundColor: gameOutcomeMessage === "Victory!" ? '#28a745' : '#dc3545'}}
+            style={claimExitButtonStyle}
           >
             {gameOutcomeMessage === "Victory!" ? "Claim Rewards & Exit" : "Exit"}
           </button>

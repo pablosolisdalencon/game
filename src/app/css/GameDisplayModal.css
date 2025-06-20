@@ -4,53 +4,77 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.85); /* Darker overlay for cinema effect */
+  background-color: rgba(0, 0, 0, 0.9); /* Even darker for cinema mode */
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1100; /* Higher than OfficeModal */
+  z-index: 1100;
+  padding: 20px;
 }
 
 .game-modal-content {
-  background-color: #1e1e1e; /* Dark background for the modal content */
-  color: #e0e0e0; /* Light text color */
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-  width: 80%;
-  max-width: 900px; /* Larger width for game display */
-  min-height: 60vh; /* Taller for game display */
+  background-color: #1a1a1a; /* Very dark grey, almost black */
+  color: #f0f0f0; /* Off-white text */
+  padding: 20px; /* Standardized padding */
+  border-radius: 12px; /* Smoother radius */
+  border: 1px solid #00aaff; /* Accent border */
+  box-shadow: 0 0 30px rgba(0, 170, 255, 0.5); /* Glowing effect with accent color */
+  width: 100%;
+  max-width: 1000px; /* Wider for game content */
+  min-height: 70vh; /* Taller */
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  /* justify-content: space-between; Removed to allow minigame area to define its size more freely */
   text-align: center;
+  overflow: hidden; /* Prevent scrollbars on the modal itself, minigame-area will scroll if needed */
 }
 
-.game-modal-content h2 {
+.game-modal-header {
+  margin-bottom: 20px;
+}
+
+.game-modal-header h2 {
   margin-top: 0;
-  color: #00aaff; /* Accent color for title */
+  margin-bottom: 5px;
+  font-size: 2em; /* Larger title */
+  color: #00aaff; /* Accent color */
+  font-weight: bold;
 }
 
-.game-modal-content .minigame-area {
+.game-modal-header .mission-subtitle {
+  font-size: 1.1em;
+  color: #bbb; /* Subdued color for subtitle */
+  margin-bottom: 10px;
+}
+
+.minigame-area {
   flex-grow: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 1.5em;
-  margin: 20px 0;
+  display: flex; /* Keep flex to center its direct child (the game itself) */
+  flex-direction: column; /* Allow game to take full width/height of this area */
+  justify-content: flex-start; /* Align game to the top */
+  align-items: stretch; /* Stretch game horizontally */
+  background-color: #101010; /* Slightly different dark shade for game background */
+  border-radius: 8px;
+  padding: 15px; /* Padding within the game area */
+  overflow-y: auto; /* Allow scrolling within the minigame area if its content overflows */
+  margin: 0; /* Removed fixed margin */
+  min-height: 300px; /* Ensure it has some height */
 }
 
-.game-modal-content button {
-  background-color: #007bff;
+/* Fallback button style if ever used, though minigames have their own exit buttons */
+.game-modal-content .fallback-close-button {
+  background-color: #6c757d;
   color: white;
   border: none;
-  padding: 12px 20px;
+  padding: 10px 18px;
   border-radius: 5px;
   cursor: pointer;
   margin-top: 20px;
-  align-self: center; /* Center the button */
+  align-self: center;
+  font-size: 0.95em;
+  transition: background-color 0.2s ease;
 }
 
-.game-modal-content button:hover {
-  background-color: #0056b3;
+.game-modal-content .fallback-close-button:hover {
+  background-color: #5a6268;
 }
