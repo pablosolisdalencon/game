@@ -1,0 +1,56 @@
+.game-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85); /* Darker overlay for cinema effect */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100; /* Higher than OfficeModal */
+}
+
+.game-modal-content {
+  background-color: #1e1e1e; /* Dark background for the modal content */
+  color: #e0e0e0; /* Light text color */
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+  width: 80%;
+  max-width: 900px; /* Larger width for game display */
+  min-height: 60vh; /* Taller for game display */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: center;
+}
+
+.game-modal-content h2 {
+  margin-top: 0;
+  color: #00aaff; /* Accent color for title */
+}
+
+.game-modal-content .minigame-area {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5em;
+  margin: 20px 0;
+}
+
+.game-modal-content button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+  align-self: center; /* Center the button */
+}
+
+.game-modal-content button:hover {
+  background-color: #0056b3;
+}

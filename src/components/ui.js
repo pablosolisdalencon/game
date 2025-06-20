@@ -1,9 +1,42 @@
+import React, { useState } from 'react';
 import "../app/css/ui.css";
-export default function UI(){
-    return(
-        <>
+import officeData from '../data/officeData';
+import OfficeModal from './OfficeModal';
+import GameDisplayModal from './GameDisplayModal';
+import { usePlayerAccount } from '../context/PlayerAccountContext';
 
-    <div className="main-container">
+export default function UI() {
+  const { eWaveTokens, minerals } = usePlayerAccount();
+  const [selectedOffice, setSelectedOffice] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [gameMission, setGameMission] = useState(null); // State for accepted mission
+  const [isGameDisplayModalOpen, setIsGameDisplayModalOpen] = useState(false); // State for game modal
+
+  const handleOfficeClick = (officeId) => {
+    const office = officeData.find(o => o.id === officeId);
+    setSelectedOffice(office);
+    setIsModalOpen(true);
+  };
+
+  const closeOfficeModal = () => {
+    setIsModalOpen(false);
+    setSelectedOffice(null);
+  };
+
+  const handleAcceptMissionFromOffice = (mission) => {
+    // OfficeModal calls this, it has already closed itself
+    setGameMission(mission);
+    setIsGameDisplayModalOpen(true);
+  };
+
+  const closeGameDisplayModal = () => {
+    setIsGameDisplayModalOpen(false);
+    setGameMission(null);
+  };
+
+  return (
+    <>
+      <div className="main-container">
 
         <div className="space-map">
             <span className="text-2xl font-bold">SpaceMap</span>
@@ -11,26 +44,33 @@ export default function UI(){
 
         <div className="city-map">
             <div className="city-map-grid">
-                <div className="city-build mineriaBuild">CB 1</div>
+                <div className="city-build mineriaBuild" onClick={() => handleOfficeClick('mineriaBuild')}>CB 1</div>
                 <div className="city-build">CB 2</div>
                 <div className="city-build">CB 3</div>
-                <div className="city-build construccionBuild">CB 5</div>
+                <div className="city-build construccionBuild" onClick={() => handleOfficeClick('construccionBuild')}>CB 5</div>
                 <div className="city-build">CB 6</div>
                 <div className="city-build">CB 9</div>
-                <div className="city-build hotelBuild">CB 11</div>
+                <div className="city-build hotelBuild" onClick={() => handleOfficeClick('hotelBuild')}>CB 11</div>
                 <div className="city-build">CB 12</div>
-                <div className="city-build gobiernoBuild">CB 13</div>
+                <div className="city-build gobiernoBuild" onClick={() => handleOfficeClick('gobiernoBuild')}>CB 13</div>
                 <div className="city-build">CB 14</div>
-                <div className="city-build exploracionBuild">CB 15</div>
+                <div className="city-build exploracionBuild" onClick={() => handleOfficeClick('exploracionBuild')}>CB 15</div>
                 <div className="city-build">CB 16</div>
                 <div className="city-build">CB 17</div>
-                <div className="city-build miliciaBuild">CB 21</div>
+                <div className="city-build miliciaBuild" onClick={() => handleOfficeClick('miliciaBuild')}>CB 21</div>
                 <div className="city-build">CB 22</div>
-                <div className="city-build fabricaBuild">CB 25</div>
+                <div className="city-build fabricaBuild" onClick={() => handleOfficeClick('fabricaBuild')}>CB 25</div>
             </div>
         </div>
 
         <div className="menu-container">
+            <div className="slot-menu account-details">
+              <span className="menu-header">CUENTA</span>
+              <div>eWaveTokens: {eWaveTokens}</div>
+              <div>Tamita: {minerals.tamita}</div>
+              <div>Janita: {minerals.janita}</div>
+              <div>Elenita: {minerals.elenita}</div>
+            </div>
             <div className="slot-menu">
                 <div className="avatar-circle" title="Avatar del jugador">
                     </div>
@@ -74,8 +114,17 @@ export default function UI(){
                 </button>
             </div>
         </div>
-    </div>
-
-</>
-    )
+      </div>
+      {isModalOpen && selectedOffice && (
+        <OfficeModal
+          office={selectedOffice}
+          onClose={closeOfficeModal}
+          onAcceptMission={handleAcceptMissionFromOffice}
+        />
+      )}
+      {isGameDisplayModalOpen && gameMission && (
+        <GameDisplayModal mission={gameMission} onClose={closeGameDisplayModal} />
+      )}
+    </>
+  )
 }
