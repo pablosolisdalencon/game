@@ -135,14 +135,14 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
   const handleJoystickMove = useCallback((angle, intensity) => {
     if (!playerRef.current || gameOver) return;
     const player = playerRef.current;
-    player.joystickAngle = angle; player.joystickIntensity = intensity;
-    player.angle = angle;
-    if (intensity > 0.1) {
-      player.velocity.x = Math.cos(angle) * player.speed * intensity;
-      player.velocity.y = Math.sin(angle) * player.speed * intensity;
-    } else {
-      player.velocity.x = 0; player.velocity.y = 0;
-    }
+    player.joystickAngle = angle; // Set the target angle based on joystick
+    player.joystickIntensity = intensity; // Set the intensity
+
+    // The actual angle change and velocity update are handled in the gameLoop
+    // based on joystickAngle, joystickIntensity, rotationSpeed, and thrustPower.
+    // If intensity is low, gameLoop's friction will slow down the ship,
+    // and if joystickIntensity becomes 0, handleJoystickEnd will zero out velocity.
+    // No direct velocity manipulation here to keep physics centralized in gameLoop.
   }, [gameOver]);
 
   const handleJoystickEnd = useCallback(() => {
@@ -520,7 +520,11 @@ const AsteroidsGame = ({ mission, onGameFinish, styleProps, visualProps }) => {
     if (objectivesCompleted) {
       recordMissionCompletion(mission.reward, mineralsFound);
     }
-    onGameFinish();
+    if (typeof onGameFinish === 'function') {
+      onGameFinish();
+    } else {
+      console.warn("AsteroidsGame: onGameFinish prop is not a function or not provided.");
+    }
   };
 
   if (!mission || !styleProps || !visualProps) {
