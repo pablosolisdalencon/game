@@ -65,15 +65,20 @@
   background-color: var(--bg-panel-medium);
   border: 1px solid var(--color-metal);
   padding: 15px;
-  margin-bottom: 8px; /* Adjusted from 12px */
+  margin-bottom: 10px;
   border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
 }
 
-.mission-item:hover {
-  background-color: var(--color-metal-light); /* Use theme color */
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Darker shadow */
+.mission-header {
+  cursor: pointer;
+  padding-bottom: 10px;
+  border-bottom: 1px solid transparent; /* Add space but keep it invisible until hover */
+}
+
+.mission-header:hover {
+  border-bottom: 1px solid var(--color-metal-light);
 }
 
 .mission-title { /* Mission Name */
@@ -106,6 +111,13 @@
   font-size: 0.45em; /* Remains halved */
   line-height: 1.5;
   white-space: pre-wrap;
+  margin-bottom: 15px;
+}
+
+.mission-detail .modal-button {
+  display: block;
+  margin-left: auto;
+  margin-right: 0;
 }
 
 /* Buttons Styling */
@@ -140,8 +152,14 @@
   color: var(--text-primary); /* Use theme text color */
 }
 
-.mission-detail .modal-button {
-  margin-right: 10px;
+.mission-actions {
+  display: flex;
+  justify-content: flex-end; /* Aligns button to the right */
+  padding-top: 15px;
+}
+
+.mission-actions .modal-button {
+  margin-top: 0; /* Override default margin-top for buttons */
 }
 
 /* Close button at the bottom of the modal */

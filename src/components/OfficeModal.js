@@ -31,29 +31,33 @@ const OfficeModal = ({ office, onClose, onAcceptMission }) => {
               <div
                 key={mission.id}
                 className="mission-item"
-                onClick={() => handleMissionClick(mission.id)}
               >
-                <div className="mission-title">{mission.name}</div>
-                <div><strong>Ubicación:</strong> {mission.location}</div>
-                <div><strong>Recompensa:</strong> {mission.reward} eWaveTokens</div>
+                <div className="mission-header" onClick={() => handleMissionClick(mission.id)}>
+                  <div className="mission-title">{mission.name}</div>
+                  <div><strong>Ubicación:</strong> {mission.location}</div>
+                  <div><strong>Recompensa:</strong> {mission.reward} eWaveTokens</div>
+                </div>
 
                 {selectedMissionId === mission.id && (
                   <div className="mission-detail">
                     <p>{mission.description}</p>
                     <button
-                      className="modal-button"
-                      onClick={(e) => { e.stopPropagation(); handleAcceptMission(mission); }}
-                    >
-                      Acceptar Misión
-                    </button>
-                    <button
                       className="modal-button secondary"
-                      onClick={(e) => { e.stopPropagation(); handleMissionClick(null); }}
+                      onClick={() => handleMissionClick(mission.id)}
                     >
                       Ocultar Descripción
                     </button>
                   </div>
                 )}
+
+                <div className="mission-actions">
+                  <button
+                    className="modal-button"
+                    onClick={() => handleAcceptMission(mission)}
+                  >
+                    Acceptar Misión
+                  </button>
+                </div>
               </div>
             ))}
           </div>
